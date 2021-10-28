@@ -1,0 +1,6 @@
+tmdb_API = '96606974601b25618007917bb01a0f5f'
+tvdb_API = 'JMCO8LQHIXX76CGN'
+fanarttv_API_key = '9f846e7ec1ea94fad5d8a431d1d26b43'
+fanarttv_client_key = 'cf0ebcc2f7b824bd04cf3a318f15c17d'
+trakt_API = 'ccb4fbf0447d86edf30f71caf8f6a8c268e8d4014f84e536746b69752407bfd5'
+trakt_secret = 'ed7cff6b0c686789f101c91a5733d5b3e5122bafd1328f31dbd440d6fb5f4cbf'
