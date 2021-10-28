@@ -5,7 +5,7 @@ import sys
 if sys.version_info >= (3, 4):
     ABC = abc.ABC  # noqa
 else:
-    ABC = abc.ABCMeta("ABC", (), {})
+    ABC = abc.ABCMeta('ABC', (), {})
 
 # ------------------------------------------------------------------------------- #
 
@@ -25,9 +25,9 @@ class Captcha(ABC):
     def dynamicImport(cls, name):
         if name not in captchaSolvers:
             try:
-                __import__("{}.{}".format(cls.__module__, name))
+                __import__('{}.{}'.format(cls.__module__, name))
                 if not isinstance(captchaSolvers.get(name), Captcha):
-                    raise ImportError("The anti captcha provider was not initialized.")
+                    raise ImportError('The anti captcha provider was not initialized.')
             except ImportError:
                 sys.tracebacklimit = 0
                 logging.error("Unable to load {} anti captcha provider".format(name))

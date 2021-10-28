@@ -60,7 +60,6 @@ class CloudflareCaptchaProvider(CloudflareException):
     Raise an exception for no Captcha provider loaded for Cloudflare.
     """
 
-
 # ------------------------------------------------------------------------------- #
 
 

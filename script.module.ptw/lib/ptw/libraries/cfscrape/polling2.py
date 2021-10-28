@@ -4,11 +4,10 @@ Never write another polling function again.
 
 """
 
-__version__ = "0.4.6"
+__version__ = '0.4.6'
 
 import logging
 import time
-
 try:
     from Queue import Queue
 except ImportError:
@@ -20,7 +19,6 @@ LOGGER = logging.getLogger(__name__)
 
 class PollingException(Exception):
     """Base exception that stores all return values of attempted polls"""
-
     def __init__(self, values, last=None):
         self.values = values
         self.last = last
@@ -72,10 +70,8 @@ def is_value(val):
 
     :return: checker function testing if parameter is val, call checker to get a boolean
     """
-
     def checker(_val):
         return val is _val
-
     return checker
 
 
@@ -87,29 +83,15 @@ def log_value(check_success, level=logging.DEBUG):
 
     :return: decorator check_success function.
     """
-
     def wrap_check_success(return_val):
         LOGGER.log(level, "poll() calls check_success(%s)", return_val)
         return check_success(return_val)
-
     return wrap_check_success
 
 
-def poll(
-    target,
-    step,
-    args=(),
-    kwargs=None,
-    timeout=None,
-    max_tries=None,
-    check_success=is_truthy,
-    step_function=step_constant,
-    ignore_exceptions=(),
-    poll_forever=False,
-    collect_values=None,
-    log=logging.NOTSET,
-    log_error=logging.NOTSET,
-):
+def poll(target, step, args=(), kwargs=None, timeout=None, max_tries=None, check_success=is_truthy,
+         step_function=step_constant, ignore_exceptions=(), poll_forever=False, collect_values=None,
+         log=logging.NOTSET, log_error=logging.NOTSET):
     """Poll by calling a target function until a certain condition is met.
 
     You must specify at least a target function to be called and the step -- base wait time between each function call.
@@ -179,14 +161,12 @@ def poll(
     if the poll takes longer than it should.
     """
 
-    assert (timeout is not None or max_tries is not None) or poll_forever, (
-        "You did not specify a maximum number of tries or a timeout. Without either of these set, the polling "
-        'function will poll forever. If this is the behavior you want, pass "poll_forever=True"'
-    )
+    assert (timeout is not None or max_tries is not None) or poll_forever, \
+        ('You did not specify a maximum number of tries or a timeout. Without either of these set, the polling '
+         'function will poll forever. If this is the behavior you want, pass "poll_forever=True"')
 
-    assert not (
-        (timeout is not None or max_tries is not None) and poll_forever
-    ), "You cannot specify both the option to poll_forever and max_tries/timeout."
+    assert not ((timeout is not None or max_tries is not None) and poll_forever), \
+        'You cannot specify both the option to poll_forever and max_tries/timeout.'
 
     kwargs = kwargs or dict()
     values = collect_values or Queue()
@@ -195,7 +175,7 @@ def poll(
     tries = 0
 
     # Always log what polling is about to take place.
-    msg = "Begin poll(target=%s, step=%s, timeout=%s, max_tries=%s, poll_forever=%s)"
+    msg = ("Begin poll(target=%s, step=%s, timeout=%s, max_tries=%s, poll_forever=%s)")
     LOGGER.debug(msg, target, step, timeout, max_tries, poll_forever)
 
     if log:
@@ -213,7 +193,7 @@ def poll(
         except ignore_exceptions as e:
             last_item = e
 
-            if log_error:  # NOTSET is 0, so it'll evaluate to False.
+            if log_error: # NOTSET is 0, so it'll evaluate to False.
                 LOGGER.log(log_error, "poll() ignored exception %r", e)
 
         else:
