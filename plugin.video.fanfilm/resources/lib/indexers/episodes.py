@@ -1162,10 +1162,11 @@ class episodes:
 
     def tvmaze_list(self, url, limit):
         try:
-            result = client.request(url)
+#            result = client.request(url)
+            items = self.session.get(url).json()
 
             itemlist = []
-            items = json.loads(result)
+ #           items = json.loads(result)
         except:
             return
 
@@ -1245,13 +1246,13 @@ class episodes:
                 except: duration = '0'
                 if duration == None: duration = '0'
                 duration = str(duration)
-                duration = six.ensure_str(duration)
+#                duration = six.ensure_str(duration)
 
                 try: rating = item['show']['rating']['average']
                 except: rating = '0'
                 if rating == None or rating == '0.0': rating = '0'
                 rating = str(rating)
-                rating = six.ensure_str(rating)
+#                rating = six.ensure_str(rating)
 
                 votes = '0'
 
@@ -1260,7 +1261,7 @@ class episodes:
                 if plot == None: plot = '0'
                 plot = re.sub('<.+?>|</.+?>|\n', '', plot)
                 plot = client.replaceHTMLCodes(plot)
-                plot = six.ensure_str(plot)
+#                plot = six.ensure_str(plot)
 
                 poster2 = fanart = banner = landscape = clearlogo = clearart = '0'
 
