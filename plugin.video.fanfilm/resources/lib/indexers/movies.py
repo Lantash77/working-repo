@@ -80,6 +80,7 @@ class movies:
         self.tm_user = apis.tmdb_API#control.setting("tm.user")
         self.tmdb_api_link = 'https://api.themoviedb.org/3/movie/%s?api_key=%s&language=%s&append_to_response=credits,external_ids' % ('%s', self.tm_user, self.lang)
         self.tmdb_by_imdb = 'https://api.themoviedb.org/3/find/%s?api_key=%s&external_source=imdb_id' % ('%s', self.tm_user)
+        self.tmdb_providers = 'https://api.themoviedb.org/3/movie/%s/watch/providers?api_key=%s' % ('%s', self.tm_user)
         self.fanart_tv_user = apis.fanarttv_client_key#control.setting("fanart.tv.user")
         self.fanart_tv_headers = {"api-key": apis.fanarttv_API_key}#control.setting("fanart.tv.dev")}
         if not self.fanart_tv_user == "":
@@ -1497,7 +1498,7 @@ class movies:
             u = url.replace("?" + urllib.urlparse(url).query, "") + "?" + q
 
             result = trakt.getTraktAsJson(u)
-            result = convert(result)
+#            result = convert(result)
 
             items = []
             for i in result:
@@ -2205,17 +2206,31 @@ class movies:
             poster = poster3 or poster2 or poster1
             fanart = fanart2 or fanart1
             #log_utils.log('title: ' + title + ' - poster: ' + repr(poster))
+            providers = ''
+            try:
+                r3 = self.session.get(self.tmdb_providers % tmdb, timeout=10)
+                r3.raise_for_status()
+                r3.encoding = 'utf-8'
+                provider = r3.json()
+
+                providerspage = provider['results'][self.lang.upper()]['link']
+                providers_list = [i['provider_name'] for i in provider['results'][self.lang.upper()]['flatrate']]
+                providers = {'link': providerspage, 'provider_list': providers_list}
+            except:
+                pass
 
             item = {'title': title, 'originaltitle': title, 'label': label, 'year': year, 'imdb': imdb, 'tmdb': tmdb, 'poster': poster, 'banner': banner, 'fanart': fanart,
                     'clearlogo': clearlogo, 'clearart': clearart, 'landscape': landscape, 'discart': discart, 'premiered': premiered, 'genre': genre, 'duration': duration,
-                    'director': director, 'writer': writer, 'castwiththumb': castwiththumb, 'plot': plot, 'tagline': tagline, 'status': status, 'studio': studio, 'country': country}
+                    'director': director, 'writer': writer, 'castwiththumb': castwiththumb, 'plot': plot, 'tagline': tagline, 'status': status, 'studio': studio, 'country': country,
+                    'providers': providers
+            }
             item = dict((k,v) for k, v in item.items() if not v == '0')
             self.list[i].update(item)
 
             meta = {'imdb': imdb, 'tmdb': tmdb, 'tvdb': '0', 'lang': self.lang, 'user': self.user, 'item': item}
             self.meta.append(meta)
         except:
-            log_utils.log('superinfo_fail', 1) #do poprawy po update log
+#            log_utils.log('superinfo_fail', 'indexer') #do poprawy po update log
             pass
 
 
@@ -2568,7 +2583,7 @@ class movies:
                 imdb, tmdb, title, year = (
                     i["imdb"],
                     i["tmdb"],
-                    i["originaltitle"],
+                    i["label"],
                     i["year"],
                 )
                 sysname = urllib.quote_plus("%s (%s)" % (title, year))
@@ -2605,7 +2620,7 @@ class movies:
                 ]
                 poster = poster[0] if poster else addonPoster
                 meta.update({"poster": poster})
-#                meta = convert(meta)
+                meta = convert(meta)
                 sysmeta = urllib.quote_plus(json.dumps(meta))
 
                 url = "%s?action=play&title=%s&year=%s&imdb=%s&meta=%s&t=%s" % (
@@ -2751,6 +2766,7 @@ class movies:
 
                 control.addItem(handle=syshandle, url=url, listitem=item, isFolder=True)
             except Exception as e:
+                print(e)
                 pass
 
         try:
