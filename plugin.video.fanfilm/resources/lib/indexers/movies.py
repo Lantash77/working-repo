@@ -2039,15 +2039,15 @@ class movies:
             #log_utils.log('self_lang: %s | original_language: %s | list_title: %s | name: %s | original_name: %s | en_trans_name: %s' % (self.lang, original_language, list_title, name, original_name, en_trans_name))
 
             if self.lang == 'en':
-                title = label = name
+                originaltitle = title = name
             else:
-                title = en_trans_name or original_name
+                originaltitle = en_trans_name or original_name
                 if original_language == self.lang:
-                    label = name
+                    title = name
                 else:
-                    label = en_trans_name or name
+                    title =  name #or en_trans_name
+            if not originaltitle: originaltitle = list_title
             if not title: title = list_title
-            if not label: label = list_title
 
             plot = item.get('overview') or self.list[i]['plot']
 
@@ -2219,7 +2219,7 @@ class movies:
             except:
                 pass
 
-            item = {'title': title, 'originaltitle': title, 'label': label, 'year': year, 'imdb': imdb, 'tmdb': tmdb, 'poster': poster, 'banner': banner, 'fanart': fanart,
+            item = {'title': title, 'originaltitle': originaltitle, 'label': title, 'year': year, 'imdb': imdb, 'tmdb': tmdb, 'poster': poster, 'banner': banner, 'fanart': fanart,
                     'clearlogo': clearlogo, 'clearart': clearart, 'landscape': landscape, 'discart': discart, 'premiered': premiered, 'genre': genre, 'duration': duration,
                     'director': director, 'writer': writer, 'castwiththumb': castwiththumb, 'plot': plot, 'tagline': tagline, 'status': status, 'studio': studio, 'country': country,
                     'providers': providers
@@ -2583,7 +2583,7 @@ class movies:
                 imdb, tmdb, title, year = (
                     i["imdb"],
                     i["tmdb"],
-                    i["label"],
+                    i["originaltitle"],
                     i["year"],
                 )
                 sysname = urllib.quote_plus("%s (%s)" % (title, year))

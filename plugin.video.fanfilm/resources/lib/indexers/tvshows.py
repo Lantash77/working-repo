@@ -1939,15 +1939,15 @@ class tvshows:
             #log_utils.log('self_lang: %s | original_language: %s | list_title: %s | name: %s | original_name: %s | en_trans_name: %s' % (self.lang, original_language, list_title, name, original_name, en_trans_name))
 
             if self.lang == 'en':
-                title = label = name
+                originaltitle = title = name
             else:
-                title = en_trans_name or original_name
+                originaltitle = en_trans_name or original_name
                 if original_language == self.lang:
-                    label = name
+                    title = name
                 else:
-                    label = en_trans_name or name
+                    title =  name #or en_trans_name
+            if not originaltitle: originaltitle = list_title
             if not title: title = list_title
-            if not label: label = list_title
 
             plot = item.get('overview', '')
             if not plot: plot = self.list[i]['plot']
@@ -2102,7 +2102,7 @@ class tvshows:
             fanart = fanart2 or fanart1
             #log_utils.log('title: ' + title + ' - tvdb: ' + tvdb + ' - poster: ' + repr(poster))
 
-            item = {'title': title, 'originaltitle': title, 'label': label, 'year': year, 'imdb': imdb, 'tmdb': tmdb, 'tvdb': tvdb, 'poster': poster, 'fanart': fanart, 'banner': banner,
+            item = {'title': title, 'originaltitle': originaltitle, 'label': title, 'year': year, 'imdb': imdb, 'tmdb': tmdb, 'tvdb': tvdb, 'poster': poster, 'fanart': fanart, 'banner': banner,
                     'clearlogo': clearlogo, 'clearart': clearart, 'landscape': landscape, 'premiered': premiered, 'studio': studio, 'genre': genre, 'duration': duration, 'mpaa': mpaa,
                     'castwiththumb': castwiththumb, 'plot': plot, 'status': status, 'tagline': tagline, 'country': country}
             item = dict((k,v) for k, v in item.items() if not v == '0')
