@@ -1498,7 +1498,7 @@ class movies:
             u = url.replace("?" + urllib.urlparse(url).query, "") + "?" + q
 
             result = trakt.getTraktAsJson(u)
-#            result = convert(result)
+            result = convert(result)
 
             items = []
             for i in result:
