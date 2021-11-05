@@ -136,8 +136,13 @@ class seasons:
             r = self.session.get(url, timeout=10)
             r.raise_for_status()
             r.encoding = 'utf-8'
-            item = r.json()# if six.PY3 else utils.json_loads_as_str(r.text)
+            item = r.json()
             #log_utils.log('tmdb_item: ' + str(item))
+            r_en = self.session.get(seasons_en_url, timeout=10)
+            r_en.raise_for_status()
+            r_en.encoding = 'utf-8'
+            seasons_en = r_en.json()['seasons']
+
 
             if imdb == '0':
                 try:
@@ -156,6 +161,7 @@ class seasons:
             seasons = item['seasons']
             if self.specials == 'false':
                 seasons = [s for s in seasons if not s['season_number'] == 0]
+                seasons_en = [s for s in seasons_en if not s['season_number'] == 0]
 
             try: studio = item['networks'][0]['name']
             except: studio = ''
@@ -231,7 +237,7 @@ class seasons:
         except Exception as e:
             log_utils.log('tmdb-list1 Exception: %s ' % e, 'indexer')
             return
-
+        count = 0
         for s_item in seasons:
             try:
                 season = str(s_item['season_number'])
@@ -243,9 +249,11 @@ class seasons:
                     unaired = 'true'
                     if self.showunaired != 'true': raise Exception()
 
-                plot = s_item.get('overview', '')
-                if not plot: plot = show_plot
-
+                plot = s_item['overview']
+                if not plot:
+                    plot = seasons_en[count]['overview']
+                    if not plot: plot = show_plot
+                count += 1
                 poster_path = s_item.get('poster_path')
                 if poster_path: season_poster = self.tm_img_link % ('500', poster_path)
                 else: season_poster = None
@@ -454,11 +462,11 @@ class seasons:
                     art.update({"clearart": i["clearart"]})
 
                 castwiththumb = i.get("castwiththumb")
-                if castwiththumb and not castwiththumb == "0":#                    
+                if castwiththumb and not castwiththumb == "0":
                     item.setCast(castwiththumb)
                 item.setArt(art)
                 item.addContextMenuItems(cm)
-                item.setInfo(type="video", infoLabels = control.metadataClean(meta))
+                item.setInfo(type="video", infoLabels=control.metadataClean(meta))
 
                 video_streaminfo = {"codec": "h264"}
                 item.addStreamInfo("video", video_streaminfo)
@@ -470,12 +478,12 @@ class seasons:
                 log_utils.log("season-dir Exception", "indexer")
                 pass
 
-        try: control.property(syshandle, "showplot", items[0]["plot"])
-        except: pass
+#        try: control.property(syshandle, "showplot", items[0]["plot"])
+#        except: pass
 
-        control.content(syshandle, "seasons")
+        control.content(syshandle, "tvshows")
         control.directory(syshandle, cacheToDisc=True)
-        views.setView("seasons", {"skin.estuary": 55, "skin.confluence": 500})
+#        views.setView("seasons", {"skin.estuary": 55, "skin.confluence": 500})
 
 
 class episodes:
@@ -501,6 +509,7 @@ class episodes:
         self.tmdb_season_link = "https://api.themoviedb.org/3/tv/%s/season/%s?api_key=%s&language=%s&append_to_response=aggregate_credits" % ("%s", "%s", self.tm_user, "%s")
         self.tmdb_season_lite_link = "https://api.themoviedb.org/3/tv/%s/season/%s?api_key=%s&language=en" % ("%s", "%s", self.tm_user)
         self.tmdb_episode_link = "https://api.themoviedb.org/3/tv/%s/season/%s/episode/%s?api_key=%s&language=%s&append_to_response=credits" % ("%s", "%s", "%s", self.tm_user, self.lang)
+        self.tmdb_episode_link_en = "https://api.themoviedb.org/3/tv/%s/season/%s/episode/%s?api_key=%s&language=en" % ("%s", "%s", "%s", self.tm_user)
         self.tmdb_by_imdb = "https://api.themoviedb.org/3/find/%s?api_key=%s&external_source=imdb_id" % ("%s", self.tm_user)
         self.tm_img_link = "https://image.tmdb.org/t/p/w%s%s"
         self.search_link = "https://api.themoviedb.org/3/search/tv?api_key=%s&language=en-US&query=%s&page=1" % (self.tm_user, "%s")
@@ -962,7 +971,18 @@ class episodes:
 
                 try: plot = item['overview']
                 except: plot = ''
-                if not plot: plot = '0'
+                if not plot:
+                    url_en = self.tmdb_episode_link_en % (tmdb, i['snum'], _episode)
+                    r_en = self.session.get(url_en, timeout=10)
+                    if r_en.json().get('status_code') == 34:
+                        url2_en = self.tmdb_episode_link_en % (tmdb, _season, '1')
+                        r_en = self.session.get(url2_en, timeout=10)
+                    r_en.raise_for_status()
+                    r_en.encoding = 'utf-8'
+                    item_en = r_en.json()
+                    try: plot = item_en['overview']
+                    except: plot = ''
+                    if not plot:plot = '0'
 
                 try:
                     r_crew = item['crew']
@@ -1392,7 +1412,13 @@ class episodes:
             r.raise_for_status()
             r.encoding = 'utf-8'
             result = r.json()# if six.PY3 else utils.json_loads_as_str(r.text)
-
+##### En plot fetch - set up
+            episodes_url_en = self.tmdb_season_lite_link % (tmdb, season)
+            r_en = self.session.get(episodes_url_en, timeout=10)
+            r_en.raise_for_status()
+            r_en.encoding = 'utf-8'
+            result_en = r_en.json()
+##########
             episodes = result['episodes']
             if self.specials == 'false':
                 episodes = [e for e in episodes if not e['season_number'] == 0]
@@ -1410,8 +1436,10 @@ class episodes:
             if meta:
                 _meta = json.loads(unquote_plus(meta))
                 poster, fanart, banner, clearlogo, clearart, landscape, duration, status = _meta['poster'], _meta['fanart'], _meta['banner'], _meta['clearlogo'], _meta['clearart'], _meta['landscape'], _meta['duration'], _meta['status']
-
+            count = 0
             for item in episodes:
+
+                print(count)
                 try:
                     season = str(item['season_number'])
 
@@ -1447,8 +1475,10 @@ class episodes:
 
                     try: episodeplot = item['overview']
                     except: episodeplot = ''
-                    if not episodeplot: episodeplot = '0'
-
+                    if not episodeplot:
+                        episodeplot = result_en['episodes'][count]['overview']
+                        if not episodeplot: episodeplot = '0'
+                    count += 1
                     # if not self.lang == 'en' and episodeplot == '0':
                         # try:
                             # en_item = en_result.get('episodes', [])
