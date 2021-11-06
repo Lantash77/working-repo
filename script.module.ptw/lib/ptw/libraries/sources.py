@@ -1820,6 +1820,12 @@ class sources:
             u = url = call.resolve(url)
 
             if url == None or (not "://" in str(url) and not local):
+                if provider == 'netflix':
+#### jak sie dobrać do netflixa :DDD
+                    string = 'RunPlugin(plugin://plugin.video.netflix/play/movie/%s' % url
+                    control.execute('RunPlugin(plugin://plugin.video.netflix/play_strm/movie/%s') % url
+                    print('urabura')
+####
                 raise Exception()
 
             if not local:
