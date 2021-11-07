@@ -136,5 +136,8 @@ class source:
 
 #        id = 'movie_' + url.split('/')[-1]
         id = url.split('/')[-1]
+#        string = 'RunPlugin(plugin://plugin.video.netflix/play/movie/%s' % url
+#        control.execute('RunPlugin(plugin://plugin.video.netflix/play_strm/movie/%s') % url
+        url = 'plugin://plugin.video.netflix/play/movie/%s' % id
         # log_utils.log('netflix - url: ' + url)
         return id
