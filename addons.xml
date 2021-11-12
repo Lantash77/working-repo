@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <addons>
-<addon id="plugin.video.fanfilm" name="FanFilm" version="2021.11.07.1-alfa" provider-name="-">
+<addon id="plugin.video.fanfilm" name="FanFilm" version="2021.11.12.0-alfa" provider-name="-">
     <requires>
         <import addon="xbmc.python" version="3.0.0"/>
         <import addon="script.module.ptw" version="2021.02.28.1"/>
@@ -26,6 +26,27 @@
         <assets>
             <icon>icon.png</icon>
         </assets>
+		<news>
+Changelog:
+Upgrade wtyczki
+2021.11.12
+- Netflix
+  Sprawdzenie czy wtyczka jest zainstalowana
+  W przypadku braku - pomija źródło
+  wyłaczenie skanowania seriali
+2021.11.05
+- Nowe źródło Netflix
+  wtyczka sprawdza czy film jest dostepny na Netflix
+  do pracy potrzebna zainstalowana i zalogowana wtyczka Netflix
+2021.10.21
+- Synchronizacja Trakt.tv fix
+  Nowe Api
+  poprawiono listę postępu seriali
+  aktualizacja do Trakt
+- zmiana dostawcy z tvdb na tmdb/fanart.tv
+  grafiki, opisy filmów i seriali
+  cleararty :)
+		</news>
     </extension>
     <reuselanguageinvoker>true</reuselanguageinvoker>
 </addon>

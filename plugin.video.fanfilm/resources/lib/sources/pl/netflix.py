@@ -8,6 +8,7 @@ import re
 from urllib.parse import parse_qs, urljoin, urlencode
 
 import requests
+import os
 from ptw.libraries import cleantitle, control, client, source_utils, log_utils, apis
 
 
@@ -22,10 +23,8 @@ class source:
         self.lang = control.apiLanguage()["tmdb"]#pobrać z settings Netflixa??
         self.tmdb_by_imdb = 'https://api.themoviedb.org/3/find/%s?api_key=%s&external_source=imdb_id' % ('%s', self.tm_user)
         self.tmdb_providers = 'https://api.themoviedb.org/3/movie/%s/watch/providers?api_key=%s' % ('%s', self.tm_user)
-        self.domains = ["iwaatch.com"]
-        self.base_link = "https://iwaatch.com"
-        self.search_link = "/?q=%s"
-
+        self.movie_patern = 'plugin://plugin.video.netflix/play/movie/%s'
+        self.netflix_path = os.path.join(control.transPath('special://home/addons/'), 'plugin.video.netflix')
 
     def movie(self, imdb, title, localtitle, aliases, year):
         try:
@@ -97,19 +96,27 @@ class source:
 
             if url is None:
                 return sources
+            if os.path.exists(self.netflix_path) == True:
+                data = parse_qs(url)
+                data = dict([(i, data[i][0]) if data[i] else (i, "") for i in data])
 
-            data = parse_qs(url)
-            data = dict([(i, data[i][0]) if data[i] else (i, "") for i in data])
+                title = data["title"]
+                year = data["year"]
+                if "tvshowtitle" in data: return sources
+                else:
+                    searchlink = data['providerlink']
+                    header = {"user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/95.0.4638.69 Safari/537.36"}
+                    r = self.session.get(searchlink, headers=header, timeout=5)
+                    r = client.parseDOM(r.text, 'ul', attrs={'class': "providers"})[0]
+                    lista = [client.parseDOM(r, 'a', ret='href'), [i[-2:] for i in re.findall('ott_filter_(.+?)">', r)]]
+                    link = self.session.get(lista[0][0]).url
+                    quality = lista[1][0].upper()
 
-            title = data["title"]
-            year = data["year"]
-            searchlink = data['providerlink']
-            header = {"user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/95.0.4638.69 Safari/537.36"}
-            r = self.session.get(searchlink, headers=header, timeout=5)
-            r = client.parseDOM(r.text, 'ul', attrs={'class': "providers"})[0]
-            lista = [client.parseDOM(r, 'a', ret='href'), [i[-2:] for i in re.findall('ott_filter_(.+?)">', r)]]
-            link = self.session.get(lista[0][0]).url
-            quality = lista[1][0].upper()
+                    id = link.split('/')[-1]
+
+                    link = self.movie_patern % id
+            else: return sources
+            # log_utils.log('netflix - url: ' + url)
             ############
 
 
@@ -135,8 +142,5 @@ class source:
     def resolve(self, url):
 
 
-        id = url.split('/')[-1]
 
-        url = 'plugin://plugin.video.netflix/play/movie/%s' % id
-        # log_utils.log('netflix - url: ' + url)
         return url

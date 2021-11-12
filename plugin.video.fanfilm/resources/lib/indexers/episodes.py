@@ -478,12 +478,12 @@ class seasons:
                 log_utils.log("season-dir Exception", "indexer")
                 pass
 
-#        try: control.property(syshandle, "showplot", items[0]["plot"])
-#        except: pass
+        try: control.property(syshandle, "showplot", items[0]["plot"])
+        except: pass
 
-        control.content(syshandle, "tvshows")
+        control.content(syshandle, "seasons")
         control.directory(syshandle, cacheToDisc=True)
-#        views.setView("seasons", {"skin.estuary": 55, "skin.confluence": 500})
+        views.setView("seasons", {"skin.estuary": 55, "skin.confluence": 500})
 
 
 class episodes:
