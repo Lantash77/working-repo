@@ -79,6 +79,7 @@
         <setting id="provider.zaluknij" type="bool" label="Zaluknij" default="true"/>
         <setting id="provider.vizjer" type="bool" label="vizjer" default="true"/>
         <setting id="provider.netflix" type="bool" label="Netflix" default="true"/>
+		<setting id="provider.pobrane" type="bool" label="Pobrane" default="true"/>
         <setting label="English" type="lsep"/>
         <setting type="sep"/>
         <setting id="provider.123movies" type="bool" label="123movies" default="true"/>
