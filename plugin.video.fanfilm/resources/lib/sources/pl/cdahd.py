@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
 """
-    Covenant Add-on
-    Copyright (C) 2017 homik
+    FanFilm Add-on
+
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -26,14 +26,16 @@ except:
 import json
 import requests
 
+
 # from ptw.libraries import cleantitle, source_utils
 # from ptw.libraries import client, cache
 from ptw.libraries import cleantitle, source_utils
-from ptw.libraries import client, cache
+from ptw.libraries import client, cache, cfscrape
 
 
 class source:
     def __init__(self):
+        self.session = requests.Session()
         self.priority = 1
         self.language = ["pl"]
         self.domains = ["cda-hd.cc"]
@@ -117,7 +119,7 @@ class source:
             except:
                 cookies = ""
             sources = []
-
+#            result =
             result = client.request(url, cookie=cookies, headers=self.headers)
             result = client.parseDOM(result, "li", attrs={"class": "elemento"})
             for item in result:

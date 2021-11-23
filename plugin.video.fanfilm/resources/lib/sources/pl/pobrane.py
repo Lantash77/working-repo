@@ -77,13 +77,11 @@ class source:
                 dest,
                 transname
             )
-            print('pasue')
             url = urlencode(url)
             return url
         except:
             log_utils.log("netflix2 - Exception", 'sources')
             return
-
 
     def sources(self, url, hostDict, hostprDict):
         sources = []
@@ -97,36 +95,25 @@ class source:
             filename = data['filename']
 
             if 'tvshowtitle' in data:
-                filename = data['filename'] + 'S%02dE%02d' % (int(data['season']), int(data['episode']))
-
-                print('series')
+                filename = re.sub(r'\+', '', data['filename']) + ' S%02dE%02d' % (int(data['season']), int(data['episode']))
             else:
                 filename = data['filename']
-                print('movies')
-
-            for r, d, f in os.walk(path):
-                for file in f:
-                    test = file[:-3:]
-                    if filename in file:
-                        if [file.endswith(ext) for ext in self.ext]:
-
-                            url = os.path.join(r, file)
-                            print('movies')
-
-                else:
-                    return sources
-
-            
-            
-            
-
+            if os.path.exists(path):
+                for r, d, f in os.walk(path):
+                    for file in f:
+                        if filename in file:
+                            if [file.endswith(ext) for ext in self.ext]:
+                                url = os.path.join(r, file)
+                        else:
+                           return sources
+            else:
+                return sources
             sources.append(
                 {
                     "source": "pobrane",
                     "quality": 'HD',
                     "language": "pl",
-                    "url": url,                    
-                    "local": True,
+                    "url": url,
                     "direct": True,
                     "debridonly": False,
                 }
@@ -138,7 +125,5 @@ class source:
             return sources
 
     def resolve(self, url):
-
-
 
         return url

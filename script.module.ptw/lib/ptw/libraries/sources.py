@@ -39,6 +39,7 @@ from ptw.libraries import client
 from ptw.libraries import debrid
 from ptw.libraries import source_utils
 from ptw.libraries import log_utils
+from ptw.libraries import PTN
 from ptw.debug import log
 
 from sqlite3 import dbapi2 as database
@@ -277,146 +278,161 @@ class sources:
             tvdb = meta["tvdb"] if "tvdb" in meta else None
             tmdb = meta['tmdb'] if 'tmdb' in meta else None
             # self.test = {'Nazwa': title, 'Rok': year, 'Sezon': season, 'Odcinek': episode}
-            next = []
-            prev = []
-            total = []
 
-            for i in range(1, 1000):
-                try:
-                    u = control.infoLabel("ListItem(%s).FolderPath" % str(i))
-                    if u in total:
-                        raise Exception()
-                    total.append(u)
-                    u = dict(urllib.parse_qsl(u.replace("?", "")))
-                    u = json.loads(u["source"])[0]
-                    next.append(u)
-                except:
-                    break
-            for i in range(-1000, 0)[::-1]:
-                try:
-                    u = control.infoLabel("ListItem(%s).FolderPath" % str(i))
-                    if u in total:
-                        raise Exception()
-                    total.append(u)
-                    u = dict(urllib.parse_qsl(u.replace("?", "")))
-                    u = json.loads(u["source"])[0]
-                    prev.append(u)
-                except:
-                    break
+            s = json.loads(source)[0]
 
-            items = json.loads(source)
-            items = [i for i in items + next + prev][:40]
+            if s["source"] == 'pobrane':
+                
+                from ptw.libraries.player import player
+                
+                player().run(
+                    title, year, season, episode, imdb, tvdb, s["url"], meta
+                )
 
-            header = control.addonInfo("name")
-            header2 = header.upper()
+            else:
+                next = []
+                prev = []
+                total = []
 
-            progressDialog = (
-                control.progressDialog
-                if control.setting("progress.dialog") == "0"
-                else control.progressDialogBG
-            )
-            progressDialog.create(header, "")
-            progressDialog.update(0)
-
-            block = None
-
-            import threading
-
-            for i in range(len(items)):
-                try:
+                for i in range(1, 1000):
                     try:
-                        if progressDialog.iscanceled():
-                            break
-                        progressDialog.update(
-                            int((100 / float(len(items))) * i),
-                            str(items[i]["label"]) + "\n" + str(" "),
-                        )
+                        u = control.infoLabel("ListItem(%s).FolderPath" % str(i))
+                        if u in total:
+                            raise Exception()
+                        total.append(u)
+                        u = dict(urllib.parse_qsl(u.replace("?", "")))
+                        u = json.loads(u["source"])[0]
+                        next.append(u)
                     except:
-                        progressDialog.update(
-                            int((100 / float(len(items))) * i),
-                            str(header2) + "\n" + str(items[i]["label"]),
-                        )
-
-                    if items[i]["source"] == block:
-                        raise Exception()
-                    w = threading.Thread(target=self.sourcesResolve, args=(items[i],))
-                    w.start()
-
-                    offset = 60 * 2 if items[i].get("source") in self.hostcapDict else 0
-
-                    m = ""
-
-                    for x in range(3600):
-                        try:
-                            if xbmc.Monitor().abortRequested() == True:
-                                return sys.exit()
-                            if progressDialog.iscanceled():
-                                return progressDialog.close()
-                        except:
-                            pass
-
-                        k = control.condVisibility("Window.IsActive(virtualkeyboard)")
-                        if k:
-                            m += "1"
-                            m = m[-1]
-                        if (w.is_alive() == False or x > 30 + offset) and not k:
-                            break
-                        k = control.condVisibility("Window.IsActive(yesnoDialog)")
-                        if k:
-                            m += "1"
-                            m = m[-1]
-                        if (w.is_alive() == False or x > 30 + offset) and not k:
-                            break
-                        time.sleep(0.5)
-
-                    for x in range(30):
-                        try:
-                            if xbmc.Monitor().abortRequested() == True:
-                                return sys.exit()
-                            if progressDialog.iscanceled():
-                                return progressDialog.close()
-                        except:
-                            pass
-
-                        if m == "":
-                            break
-                        if w.is_alive() == False:
-                            break
-                        time.sleep(0.5)
-
-                    if w.is_alive() == True:
-                        block = items[i]["source"]
-
-                    if self.url == None:
-                        raise Exception()
-
+                        break
+                for i in range(-1000, 0)[::-1]:
                     try:
-                        progressDialog.close()
+                        u = control.infoLabel("ListItem(%s).FolderPath" % str(i))
+                        if u in total:
+                            raise Exception()
+                        total.append(u)
+                        u = dict(urllib.parse_qsl(u.replace("?", "")))
+                        u = json.loads(u["source"])[0]
+                        prev.append(u)
                     except:
+                        break
+
+                items = json.loads(source)
+                items = [i for i in items + next + prev][:40]
+
+                header = control.addonInfo("name")
+                header2 = header.upper()
+
+                progressDialog = (
+                    control.progressDialog
+                    if control.setting("progress.dialog") == "0"
+                    else control.progressDialogBG
+                )
+                progressDialog.create(header, "")
+                progressDialog.update(0)
+
+                block = None
+
+                import threading
+
+                for i in range(len(items)):
+                    try:
+                        if items[i]["source"] == 'pobrane':
+                            continue
+                        else:
+                            try:
+                                if progressDialog.iscanceled():
+                                    break
+                                progressDialog.update(
+                                    int((100 / float(len(items))) * i),
+                                    str(items[i]["label"]) + "\n" + str(" "),
+                                )
+                            except:
+                                progressDialog.update(
+                                    int((100 / float(len(items))) * i),
+                                    str(header2) + "\n" + str(items[i]["label"]),
+                                )
+
+                            if items[i]["source"] == block:
+                                raise Exception()
+                            w = threading.Thread(target=self.sourcesResolve, args=(items[i],))
+                            w.start()
+
+                            offset = 60 * 2 if items[i].get("source") in self.hostcapDict else 0
+
+                            m = ""
+
+                            for x in range(3600):
+                                try:
+                                    if xbmc.Monitor().abortRequested() == True:
+                                        return sys.exit()
+                                    if progressDialog.iscanceled():
+                                        return progressDialog.close()
+                                except:
+                                    pass
+
+                                k = control.condVisibility("Window.IsActive(virtualkeyboard)")
+                                if k:
+                                    m += "1"
+                                    m = m[-1]
+                                if (w.is_alive() == False or x > 30 + offset) and not k:
+                                    break
+                                k = control.condVisibility("Window.IsActive(yesnoDialog)")
+                                if k:
+                                    m += "1"
+                                    m = m[-1]
+                                if (w.is_alive() == False or x > 30 + offset) and not k:
+                                    break
+                                time.sleep(0.5)
+
+                            for x in range(30):
+                                try:
+                                    if xbmc.Monitor().abortRequested() == True:
+                                        return sys.exit()
+                                    if progressDialog.iscanceled():
+                                        return progressDialog.close()
+                                except:
+                                    pass
+
+                                if m == "":
+                                    break
+                                if w.is_alive() == False:
+                                    break
+                                time.sleep(0.5)
+
+                            if w.is_alive() == True:
+                                block = items[i]["source"]
+
+                            if self.url == None:
+                                raise Exception()
+
+                            try:
+                                progressDialog.close()
+                            except:
+                                pass
+
+                            control.sleep(200)
+                            control.execute("Dialog.Close(virtualkeyboard)")
+                            control.execute("Dialog.Close(yesnoDialog)")
+
+                            from ptw.libraries.player import player
+
+                            meta.update({u"link1": items[i]["url"], u"link2": str(self.url)})
+                            player().run(
+                                title, year, season, episode, imdb, tvdb, self.url, meta
+                            )
+
+                            return self.url
+                    except Exception as e:
+                        print(e)
                         pass
 
-                    control.sleep(200)
-                    control.execute("Dialog.Close(virtualkeyboard)")
-                    control.execute("Dialog.Close(yesnoDialog)")
-
-                    from ptw.libraries.player import player
-
-                    meta.update({u"link1": items[i]["url"], u"link2": str(self.url)})
-                    player().run(
-                        title, year, season, episode, imdb, tvdb, self.url, meta
-                    )
-
-                    return self.url
-                except Exception as e:
-                    print(e)
+                try:
+                    progressDialog.close()
+                except:
                     pass
 
-            try:
-                progressDialog.close()
-            except:
-                pass
-
-            self.errorForSources()
+                self.errorForSources()
         except:
             pass
 
@@ -1681,47 +1697,38 @@ class sources:
             prem_identify = "blue"
         prem_identify = self.getPremColor(prem_identify)
 
-        temp_pl = [i for i in self.sources if i["language"] == self._getPrimaryLang()]
-        temp_pl_4k = [i for i in temp_pl if i["quality"] == "4K"]
-        temp_pl_fhd = [i for i in temp_pl if i["quality"] == "1080p"]
-        temp_pl_720 = [i for i in temp_pl if i["quality"] == "720p"]
-        temp_pl_sd = [i for i in temp_pl if i["quality"] == "SD"]
+        my_quality_order = ['4K', '1080p', '720p', 'SD']
+        quality_order = {key: i for i, key in enumerate(my_quality_order)}
+        my_language_order = ['pl', 'en']
+        language_order = {key: i for i, key in enumerate(my_language_order)}
 
-        temp_en = [i for i in self.sources if i["language"] == "en"]
-        temp_en_4k = [i for i in temp_en if i["quality"] == "4K"]
-        temp_en_fhd = [i for i in temp_en if i["quality"] == "1080p"]
-        temp_en_720 = [i for i in temp_en if i["quality"] == "720p"]
-        temp_en_sd = [i for i in temp_en if i["quality"] == "SD"]
-        filter = []
         if sort_source is "true":
             sort_source = control.setting("hosts.sort")
             sort_source = str(sort_source)
             if sort_source is "0":
                 log("FanFilm.Sortowanie Sortuję według dostawców")
-                filter += sorted(temp_pl_4k, key=lambda k: k["provider"])
-                filter += sorted(temp_pl_fhd, key=lambda k: k["provider"])
-                filter += sorted(temp_pl_720, key=lambda k: k["provider"])
-                filter += sorted(temp_pl_sd, key=lambda k: k["provider"])
-                filter += sorted(temp_en_4k, key=lambda k: k["provider"])
-                filter += sorted(temp_en_fhd, key=lambda k: k["provider"])
-                filter += sorted(temp_en_720, key=lambda k: k["provider"])
-                filter += sorted(temp_en_sd, key=lambda k: k["provider"])
+                self.sources = sorted(self.sources,
+                                      key=lambda d: (not d["source"].startswith("pobrane"), language_order[d["language"]], quality_order[d['quality']], d["provider"]))
             if sort_source is "1":
                 log("FanFilm.Sortowanie Sortuję według źródeł")
-                filter += sorted(temp_pl_4k, key=lambda k: k["provider"])
-                filter += sorted(temp_pl_fhd, key=lambda k: k["source"])
-                filter += sorted(temp_pl_720, key=lambda k: k["source"])
-                filter += sorted(temp_pl_sd, key=lambda k: k["source"])
-                filter += sorted(temp_en_4k, key=lambda k: k["source"])
-                filter += sorted(temp_en_fhd, key=lambda k: k["source"])
-                filter += sorted(temp_en_720, key=lambda k: k["source"])
-                filter += sorted(temp_en_sd, key=lambda k: k["source"])
-        self.sources = filter
+                self.sources = sorted(self.sources,
+                                      key=lambda d: (not d["source"].startswith("pobrane"), language_order[d["language"]], quality_order[d['quality']], d["source"]))
 
         for i in range(len(self.sources)):
 
             if extra_info == "true":
-                t = source_utils.getFileType(self.sources[i]["url"])
+                try:
+                    t = PTN.parse(self.sources[i]["url"].split("/")[-1])
+                    if 'audio' in t.keys() and 'codec' in t.keys():
+                        t = t['codec'] + " / " + t['audio']
+                    elif 'audio' in t.keys():
+                        t = t['audio']
+                    elif 'codec' in t.keys():
+                        t = t['codec']
+                    else:
+                        t = source_utils.getFileType(self.sources[i]["url"])
+                except:
+                    t = None
             else:
                 t = None
 
@@ -1782,7 +1789,7 @@ class sources:
             label = re.sub("\|\s+\|", "|", label)
             label = re.sub("\|(?:\s+|)$", "", label)
 
-            if (d or p.lower() == "tb7") or (d or p.lower() == "xt7"):
+            if (d or p.lower() == "tb7") or (d or p.lower() == "xt7") or (d or p.lower() == "pobrane"):
                 if not prem_identify == "nocolor":
                     self.sources[i]["label"] = (
                         ("[COLOR %s]" % (prem_identify)) + label.upper() + "[/COLOR]"
@@ -1821,10 +1828,8 @@ class sources:
 
             if url == None or (not "://" in str(url) and not local):
                 if provider == 'netflix':
-#### jak sie dobrać do netflixa :DDD
-
                     return url
-####
+
                 raise Exception()
 
             if not local:
