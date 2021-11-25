@@ -77,12 +77,17 @@ class tvshows:
         self.trakt_user = control.setting("trakt.user").strip()
         self.imdb_user = control.setting("imdb.user").replace("ur", "")
         self.fanart_tv_user = control.setting("fanart.tv.user")
-        self.fanart_tv_headers = {"api-key": apis.fanarttv_API_key}  # control.setting("fanart.tv.dev")}
+        if not self.fanart_tv_user: self.fanart_tv_user = apis.fanarttv_client_key
+        self.fanart_tv_API = control.setting("fanart.tv.dev")
+        if not self.fanart_tv_API: self.fanart_tv_API = apis.fanarttv_API_key
+        self.fanart_tv_headers = {"api-key": self.fanart_tv_API}
         if not self.fanart_tv_user == "":
             self.fanart_tv_headers.update({"client-key": self.fanart_tv_user})
         self.user = control.setting("fanart.tv.user") + str("")
         self.lang = control.apiLanguage()["tmdb"]
-        self.tm_user = apis.tmdb_API#control.setting("tm.user")
+#        self.tm_user = apis.tmdb_API#control.setting("tm.user")
+        self.tm_user = control.setting("tm.user")
+        if not self.tm_user: self.tm_user = apis.tmdb_API  
         self.tmdb_api_link = 'https://api.themoviedb.org/3/tv/%s?api_key=%s&language=%s&append_to_response=credits,external_ids' % ('%s', self.tm_user, self.lang)
         self.tmdb_by_imdb = 'https://api.themoviedb.org/3/find/%s?api_key=%s&external_source=imdb_id' % ('%s', self.tm_user)
         self.tmdb_networks_link = 'https://api.themoviedb.org/3/discover/tv?api_key=%s&sort_by=popularity.desc&with_networks=%s&page=1' % (self.tm_user, '%s')
@@ -2340,13 +2345,23 @@ class tvshows:
                     'clearart': i.get('clearart', '0'), 
                     'landscape': landscape
                 }
-                
+                episodes_meta = {
+                    'poster': poster,
+                    'fanart': fanart,
+                    'banner': banner,
+                    'clearlogo': i.get('clearlogo', '0'),
+                    'clearart': i.get('clearart', '0'),
+                    'landscape': landscape,
+                    'duration' : i['duration'],
+                    'status': i['status']
+                }
                 sysmeta = quote_plus(json.dumps(seasons_meta))
+                epmeta = quote_plus(json.dumps(episodes_meta))
                 
                 if flatten == True:
                     url = (
                         "%s?action=episodes&tvshowtitle=%s&year=%s&imdb=%s&tmdb=%s&meta=%s"
-                        % (sysaddon, systitle, year, imdb, tmdb, sysmeta)
+                        % (sysaddon, systitle, year, imdb, tmdb, epmeta)
                     )
                 else:
                     url = "%s?action=seasons&tvshowtitle=%s&year=%s&imdb=%s&tmdb=%s&meta=%s" % (

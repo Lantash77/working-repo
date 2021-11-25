@@ -77,17 +77,25 @@ class movies:
         self.trakt_user = control.setting("trakt.user").strip()
         self.imdb_user = control.setting("imdb.user").replace("ur", "")
         self.lang = control.apiLanguage()["tmdb"]
-        self.tm_user = apis.tmdb_API#control.setting("tm.user")
+#        self.tm_user = apis.tmdb_API#control.setting("tm.user")
+        self.tm_user = control.setting("tm.user")
+        if not self.tm_user: self.tm_user = apis.tmdb_API        
         self.tmdb_api_link = 'https://api.themoviedb.org/3/movie/%s?api_key=%s&language=%s&append_to_response=credits,external_ids' % ('%s', self.tm_user, self.lang)
         self.tmdb_by_imdb = 'https://api.themoviedb.org/3/find/%s?api_key=%s&external_source=imdb_id' % ('%s', self.tm_user)
         self.tmdb_providers = 'https://api.themoviedb.org/3/movie/%s/watch/providers?api_key=%s' % ('%s', self.tm_user)
-        self.fanart_tv_user = apis.fanarttv_client_key#control.setting("fanart.tv.user")
-        self.fanart_tv_headers = {"api-key": apis.fanarttv_API_key}#control.setting("fanart.tv.dev")}
+#        self.fanart_tv_user = apis.fanarttv_client_key#control.setting("fanart.tv.user")
+        self.fanart_tv_user = control.setting("fanart.tv.user")
+        if not self.fanart_tv_user: self.fanart_tv_user = apis.fanarttv_client_key
+        self.fanart_tv_API = control.setting("fanart.tv.dev")
+        if not self.fanart_tv_API: self.fanart_tv_API = apis.fanarttv_API_key
+#        self.fanart_tv_headers = {"api-key": apis.fanarttv_API_key}#control.setting("fanart.tv.dev")}  
+        self.fanart_tv_headers = {"api-key": self.fanart_tv_API}
         if not self.fanart_tv_user == "":
             self.fanart_tv_headers.update({"client-key": self.fanart_tv_user})
         self.user = str(control.setting("fanart.tv.user")) + str(
             control.setting("tm.user")
-        )        
+        )
+        
         self.hidecinema = control.setting("hidecinema")
         self.hidecinema_rollback = int(control.setting("hidecinema.rollback"))
         self.hidecinema_rollback2 = self.hidecinema_rollback * 30
