@@ -23,7 +23,9 @@ class source:
         self.lang = control.apiLanguage()["tmdb"]#pobrać z settings Netflixa??
         self.tmdb_by_imdb = 'https://api.themoviedb.org/3/find/%s?api_key=%s&external_source=imdb_id' % ('%s', self.tm_user)
         self.tmdb_providers = 'https://api.themoviedb.org/3/movie/%s/watch/providers?api_key=%s' % ('%s', self.tm_user)
-        self.movie_patern = 'plugin://plugin.video.netflix/play/movie/%s'
+        self.tmdb_tvproviders = 'https://api.themoviedb.org/3/tv/%s/watch/providers?api_key=%s' % ('%s', self.tm_user)
+        self.movie_pattern = 'plugin://plugin.video.netflix/play/movie/%s'
+        self.tvshow_pattern = 'https://unogs.com/api/title/episodes?netflixid=%s'
         self.netflix_path = os.path.join(control.transPath('special://home/addons/'), 'plugin.video.netflix')
 
     def movie(self, imdb, title, localtitle, aliases, year):
@@ -35,10 +37,8 @@ class source:
                 result = self.session.get(r1, timeout=16).json()
                 id = result['movie_results'][0]
                 tmdb = id['id']
-                if not tmdb:
-                    return
-                else:
-                    tmdb = str(tmdb)
+                if not tmdb: return
+                else: tmdb = str(tmdb)
             except:
                 pass
             try:
@@ -83,6 +83,28 @@ class source:
                 season,
                 episode,
             )
+            try:
+                r1 = self.tmdb_by_imdb % imdb
+                result = self.session.get(r1, timeout=16).json()
+                id = result['tv_results'][0]
+                tmdb = id['id']
+                if not tmdb: return
+                else: tmdb = str(tmdb)
+            except:
+                pass
+            try:
+                r3 = self.session.get(self.tmdb_tvproviders % tmdb, timeout=10)
+                r3.raise_for_status()
+                r3.encoding = 'utf-8'
+                provider = r3.json()
+
+                providerspage = provider['results'][self.lang.upper()]['link']
+                providers_list = [i['provider_name'] for i in provider['results'][self.lang.upper()]['flatrate'] if 'Netflix' in i['provider_name']]
+                url.update({'providerlink': providerspage, 'provider_list': providers_list[0]})
+
+
+            except:
+                pass
             url = urlencode(url)
             return url
         except:
@@ -102,19 +124,38 @@ class source:
 
                 title = data["title"]
                 year = data["year"]
-                if "tvshowtitle" in data: return sources
+
+                searchlink = data['providerlink']
+                header = {
+                    "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/95.0.4638.69 Safari/537.36"
+                }
+                r = self.session.get(searchlink, headers=header, timeout=5)
+                r = client.parseDOM(r.text, 'ul', attrs={'class': "providers"})[0]
+                lista = [client.parseDOM(r, 'a', ret='href'), [i[-2:] for i in re.findall('ott_filter_(.+?)">', r)]]
+                link = self.session.get(lista[0][0]).url
+                quality = lista[1][0].upper()
+                id = link.split('/')[-1]
+
+                if "tvshowtitle" in data:
+                    header = {
+                        'Accept': 'application/json',
+                        'referer': 'https://unogs.com/',
+                        'referrer': 'http://unogs.com',
+                        'x-requested-with': 'XMLHttpRequest',
+                    }
+                    season_no = data['season']
+                    episode_no = data['episode']
+                    r4 = self.session.get(self.tvshow_pattern % id,headers=header, timeout=5)
+                    r4.raise_for_status()
+                    r4.encoding = 'utf-8'
+                    apianswer = r4.json()
+                    apifetch = [s['episodes'] for s in apianswer if s['season'] == int(season_no)][0]
+                    ep_id = str([e['epid'] for e in apifetch if e['epnum'] == int(episode_no)][0])
+
+                    link = self.movie_pattern % ep_id
+
                 else:
-                    searchlink = data['providerlink']
-                    header = {"user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/95.0.4638.69 Safari/537.36"}
-                    r = self.session.get(searchlink, headers=header, timeout=5)
-                    r = client.parseDOM(r.text, 'ul', attrs={'class': "providers"})[0]
-                    lista = [client.parseDOM(r, 'a', ret='href'), [i[-2:] for i in re.findall('ott_filter_(.+?)">', r)]]
-                    link = self.session.get(lista[0][0]).url
-                    quality = lista[1][0].upper()
-
-                    id = link.split('/')[-1]
-
-                    link = self.movie_patern % id
+                    link = self.movie_pattern % id
             else: return sources
             # log_utils.log('netflix - url: ' + url)
             ############

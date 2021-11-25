@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""
+'''
     Covenant Add-on
     Copyright (C) 2018 :)
 
@@ -15,11 +15,11 @@
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
-"""
-
+'''
 import base64
 import json
-import urllib
+
+import requests
 
 try:
     import urllib.parse as urllib
@@ -28,20 +28,30 @@ except:
 
 from ptw.libraries import source_utils
 from ptw.libraries import cleantitle
-from ptw.libraries import client
+from ptw.libraries import client, cache
 from ptw.debug import log_exception
 
 
 class source:
     def __init__(self):
         self.priority = 1
-        self.language = ["pl"]
-        self.domains = ["filman.cc"]
+        self.language = ['pl']
+        self.domains = ['horrory.cc']
 
-        self.base_link = "https://filman.cc/"
-        self.search_link = "szukaj"
-        self.anime = False
-        self.year = 0
+        self.base_link = 'https://horrory.cc'
+        self.search_link = 'https://horrory.cc/szukaj'
+        self.session = requests.Session()
+
+    def contains_word(self, str_to_check, word):
+        if str(word).lower() in str(str_to_check).lower():
+            return True
+        return False
+
+    def contains_all_words(self, str_to_check, words):
+        for word in words:
+            if not self.contains_word(str_to_check, word):
+                return False
+        return True
 
     def movie(self, imdb, title, localtitle, aliases, year):
         return self.search(title, localtitle, year, True)
@@ -59,42 +69,36 @@ class source:
             epNo = "s" + season.zfill(2) + "e" + episode.zfill(2)
         return self.search_ep(url[0][0], url[0][1], self.year, epNo)
 
-    def contains_word(self, str_to_check, word):
-        if str(word).lower() in str(str_to_check).lower():
-            return True
-        return False
-
-    def contains_all_words(self, str_to_check, words):
-        for word in words:
-            if not self.contains_word(str_to_check, word):
-                return False
-        return True
-
     def search(self, title, localtitle, year, is_movie_search):
         try:
             titles = []
-
-            titles.append(localtitle.encode('utf8'))
-            titles.append(title.encode('utf8'))
+            titles.append(cleantitle.normalize(cleantitle.getsearch(title)))
+            titles.append(cleantitle.normalize(cleantitle.getsearch(localtitle)))
+            cookies = client.request(self.base_link, output="cookie")
+            cache.cache_insert('horrorycc_cookie', cookies)
 
             for title in titles:
                 url = urllib.urljoin(self.base_link, self.search_link)
                 data = {
-                    'phrase': title
+                    'phrase': title.replace(" ", "+")
                 }
-                title = cleantitle.normalize(cleantitle.getsearch(title.decode()))
                 result = client.request(url, post=data)
                 result = client.parseDOM(result, "div", attrs={"class": "col-xs-3 col-lg-2"})
 
                 for item in result:
-                    link = str(client.parseDOM(item, "a", ret="href")[0])
-                    nazwa = str(client.parseDOM(item, "a", ret="title")[0])
-                    name = cleantitle.normalize(cleantitle.getsearch(nazwa))
-                    name = name.replace("  ", " ")
-                    title = title.replace("  ", " ")
-                    words = title.split(" ")
-                    if self.contains_all_words(name, words) and str(year) in link:
-                        return link
+                    try:
+                        link = str(client.parseDOM(item, 'a', ret='href')[0])
+                        if link.startswith('//'):
+                            link = "https:" + link
+                        nazwa = str(client.parseDOM(item, 'a', ret='title')[0])
+                        name = cleantitle.normalize(cleantitle.getsearch(nazwa))
+                        name = name.replace("  ", " ")
+                        title = title.replace("  ", " ")
+                        words = title.split(" ")
+                        if self.contains_all_words(name, words) and str(year) in link:
+                            return link
+                    except:
+                        continue
         except Exception as e:
             log_exception()
             return
@@ -102,16 +106,14 @@ class source:
     def search_ep(self, title, localtitle, year, epNo):
         try:
             titles = []
-
-            titles.append(localtitle.encode('utf8'))
-            titles.append(title.encode('utf8'))
+            titles.append(cleantitle.normalize(cleantitle.getsearch(title)))
+            titles.append(cleantitle.normalize(cleantitle.getsearch(localtitle)))
 
             for title in titles:
                 url = urllib.urljoin(self.base_link, self.search_link)
                 data = {
                     'phrase': title
                 }
-                title = cleantitle.normalize(cleantitle.getsearch(title.decode()))
                 result = client.request(url, post=data)
                 result = client.parseDOM(result, "div", attrs={"class": "col-xs-3 col-lg-2"})
 
@@ -122,7 +124,6 @@ class source:
                         name = cleantitle.normalize(cleantitle.getsearch(nazwa))
                         name = name.replace("  ", " ")
                         for title in titles:
-                            title = cleantitle.normalize(cleantitle.getsearch(title.decode()))
                             title = title.replace("  ", " ")
                             words = title.split(" ")
                             if self.contains_all_words(name, words) and "serial" in link:
@@ -149,15 +150,15 @@ class source:
 
     def sources(self, url, hostDict, hostprDict):
         try:
+            try:
+                cookies = cache.cache_get('horrorycc_cookie')['value']
+            except:
+                cookies = ''
             sources = []
-            if url == None:
-                return sources
-            url = url
-            result = client.request(url)
-            tabela = client.parseDOM(
-                result, "table", attrs={"class": "table table-bordered"}
-            )[0]
-            tabela = client.parseDOM(tabela, "tr")
+            result = client.request(url, cookie=cookies)
+            result = client.parseDOM(result, 'table', attrs={
+                'class': 'table table-bordered'})
+            tabela = client.parseDOM(result, "tr")
             for item in tabela:
                 try:
                     if "fa fa-sort" in item:
@@ -219,29 +220,28 @@ class source:
                 except:
                     continue
             return sources
-        except Exception as e:
+        except:
             log_exception()
             return sources
 
     def get_lang_by_type(self, lang_type):
         if "dubbing" in lang_type.lower():
             if "kino" in lang_type.lower():
-                return "pl", "Dubbing Kino"
-            return "pl", "Dubbing"
-        elif "napisy pl" in lang_type.lower():
-            return "pl", "Napisy"
-        elif "napisy" in lang_type.lower():
-            return "pl", "Napisy"
-        elif "lektor pl" in lang_type.lower():
-            return "pl", "Lektor"
-        elif "lektor" in lang_type.lower():
-            return "pl", "Lektor"
-        elif "POLSKI" in lang_type.lower():
-            return "pl", None
-        elif "pl" in lang_type.lower():
-            return "pl", None
-        return "en", None
+                return 'pl', 'Dubbing Kino'
+            return 'pl', 'Dubbing'
+        elif 'lektor pl' in lang_type.lower():
+            return 'pl', 'Lektor'
+        elif 'lektor' in lang_type.lower():
+            return 'pl', 'Lektor'
+        elif 'napisy pl' in lang_type.lower():
+            return 'pl', 'Napisy'
+        elif 'napisy' in lang_type.lower():
+            return 'pl', 'Napisy'
+        elif 'POLSKI' in lang_type.lower():
+            return 'pl', None
+        elif 'pl' in lang_type.lower():
+            return 'pl', None
+        return 'en', None
 
     def resolve(self, url):
-        link = str(url).replace("//", "/").replace(":/", "://").split("?")[0]
-        return str(link)
+        return str(url)

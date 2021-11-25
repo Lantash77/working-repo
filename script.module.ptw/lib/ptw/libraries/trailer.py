@@ -23,19 +23,11 @@ from urllib.parse import quote_plus
 
 from ptw.libraries import client
 from ptw.libraries import control
+from ptw.libraries.youtube_search import YoutubeSearch
 
 
 class trailer:
     def __init__(self):
-        self.base_link = "https://www.youtube.com"
-        self.key_link = control.addon("plugin.video.youtube").getSetting(
-            "youtube.api.key"
-        )
-        self.key_link = "&key=%s" % self.key_link
-        self.search_link = (
-            "https://www.googleapis.com/youtube/v3/search?part=id&type=video&maxResults=5&q=%s"
-            + self.key_link
-        )
         self.youtube_watch = "https://www.youtube.com/watch?v=%s"
 
     def play(self, name="", url="", windowedtrailer=0):
@@ -51,8 +43,10 @@ class trailer:
             icon = control.infoLabel("ListItem.Icon")
 
             item = control.item(
-                label=name, iconImage=icon, thumbnailImage=icon, path=url
+                label=name, path=url
             )
+            #iconImage=icon, thumbnailImage=icon
+            item.setArt({"thumb": icon, "icon": icon})
             item.setInfo(type="Video", infoLabels={"Title": name})
 
             item.setProperty("IsPlayable", "true")
@@ -74,41 +68,16 @@ class trailer:
             pass
 
     def worker(self, name, url):
-        try:
-            if url.startswith(self.base_link):
-                url = self.resolve(url)
-                if not url:
-                    raise Exception()
-                return url
-            elif not url.startswith("http:"):
-                url = self.youtube_watch % url
-                url = self.resolve(url)
-                if not url:
-                    raise Exception()
-                return url
-            else:
-                raise Exception()
-        except:
-            query = name + " trailer"
-            query = self.search_link % quote_plus(query)
-            return self.search(query)
+        query = name + " trailer"
+        #query = self.search_link % quote_plus(query)
+        return self.search(query)
 
     def search(self, url):
         try:
-            apiLang = control.apiLanguage().get("youtube", "en")
-
-            if apiLang != "en":
-                url += "&relevanceLanguage=%s" % apiLang
-
-            result = client.request(url)
-
-            items = json.loads(result).get("items", [])
-            items = [i.get("id", {}).get("videoId") for i in items]
-
-            for vid_id in items:
-                url = self.resolve(vid_id)
-                if url:
-                    return url
+            results = json.loads(YoutubeSearch(url, max_results=1).to_json())
+            url = self.resolve(results['videos'][0]['id'])
+            if url:
+                return url
         except:
             return
 

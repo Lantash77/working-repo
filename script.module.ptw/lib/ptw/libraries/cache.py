@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
 """
-    Exodus Add-on
-    ///Updated for TheOath///
-
+    FanFilm Add-on
+    
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
@@ -173,6 +172,7 @@ def cache_clear():
                 cursor.commit()
             except:
                 pass
+        cache_clear_meta()
     except:
         pass
 
@@ -224,7 +224,7 @@ def cache_clear_search():
 
 def cache_clear_all():
     cache_clear()
-    cache_clear_meta()
+#   cache_clear_meta()
     cache_clear_providers()
 
 

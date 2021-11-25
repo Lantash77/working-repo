@@ -720,8 +720,8 @@ def metadataClean(metadata): # Filter out non-existing/custom keys. Otherise the
                'episodeguide', 'showlink', 'top250', 'setid', 'tracknumber', 'rating', 
                'userrating', 'watched', 'playcount', 'overlay', 'cast', 'castandrole', 
                'director', 'mpaa', 'plot', 'plotoutline', 'title', 'originaltitle', 'sorttitle',
-			   'duration', 'studio', 'tagline', 'writer', 'tvshowtitle', 'premiered',
-               'status', 'set', 'setoverview', 'tag', 'imdbnumber', 'code', 'aired',
+				'duration', 'studio', 'tagline', 'writer', 'tvshowtitle', 'premiered', 
+                'status', 'set', 'setoverview', 'tag', 'imdbnumber', 'code', 'aired', 
                 'credits', 'lastplayed', 'album', 'artist', 'votes', 'path',
 				'trailer', 'dateadded', 'mediatype', 'dbid']
     return {k: v for k, v in metadata.items() if k in allowed}

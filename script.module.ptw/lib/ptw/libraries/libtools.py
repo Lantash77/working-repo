@@ -344,7 +344,7 @@ class libtvshows:
         self.infoDialog = False
         self.block = False
 
-    def add(self, tvshowtitle, year, imdb, tvdb, range=False):
+    def add(self, tvshowtitle, year, imdb, tvdb, season, episode, meta, range=False):
         if (
             not control.condVisibility("Window.IsVisible(infodialog)")
             and not control.condVisibility("Player.HasVideo")
@@ -355,7 +355,7 @@ class libtvshows:
 
         from resources.lib.indexers import episodes
 
-        items = episodes.episodes().get(tvshowtitle, year, imdb, tvdb, idx=False)
+        items = episodes.episodes().get(tvshowtitle, year, imdb, tvdb, season, episode, meta, idx=False)
 
         try:
             items = [

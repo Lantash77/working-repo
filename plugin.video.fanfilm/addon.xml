@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<addon id="plugin.video.fanfilm" name="FanFilm" version="2021.11.12.0-alfa" provider-name="-">
+<addon id="plugin.video.fanfilm" name="FanFilm" version="2021.11.24.3" provider-name="-">
     <requires>
         <import addon="xbmc.python" version="3.0.0"/>
         <import addon="script.module.ptw" version="2021.02.28.1"/>
@@ -27,7 +27,26 @@
         </assets>
 		<news>
 Changelog:
-Upgrade wtyczki
+2021.11.24.3
+- nazwy seriali po polsku i spłaszczanie sezonów
+2021.11.24.1
+- fix czyszczenia cache
+2021.11.23.0
+- dodano skanowanie folderu pobierania
+  sprawdza czy materiał nie został już pobrany
+2021.11.22.2
+- fix seriali i filman
+2021.11.21.5
+- napraw brakujacych/żle wyświetlanych tytułów
+2021.11.21.4
+- naprawa biblioteki seriali
+- zmiana priorytetu plakatów
+2021.11.21.2
+- meta fix
+2021.11.21.1
+- Poprawka do cda
+- Dwa nowe(stare) źródła filman i horrory
+- Upgrade wtyczki
 2021.11.12
 - Netflix
   Sprawdzenie czy wtyczka jest zainstalowana

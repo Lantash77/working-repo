@@ -2040,18 +2040,29 @@ class movies:
 
             if self.lang == 'en':
                 originaltitle = title = name
+            elif self.lang == 'pl' and original_language != 'pl' and en_trans_name:
+                originaltitle = title = en_trans_name
             else:
                 originaltitle = en_trans_name or original_name
                 if original_language == self.lang:
                     title = name
                 else:
-                    title =  name #or en_trans_name
+                    title = name #or en_trans_name
+            try:
+                plot = None
+                tagline = None
+                translations_trakt = trakt.getMovieTranslation(item['imdb_id'], self.lang, full=True)
+                title = translations_trakt['title']
+                plot = translations_trakt['overview']
+                tagline = translations_trakt['tagline']
+            except:
+                pass
             if not originaltitle: originaltitle = list_title
             if not title: title = list_title
 
-            plot = item.get('overview') or self.list[i]['plot']
+            if not plot: plot = item.get('overview') or self.list[i]['plot']
 
-            tagline = item.get('tagline') or '0'
+            if not tagline: tagline = item.get('tagline') or '0'
 
             if not self.lang == 'en':
                 if plot == '0':
@@ -2234,290 +2245,6 @@ class movies:
             pass
 
 
-
-#        self.list = metacache.local(self.list, self.tm_img_link, "poster3", "fanart2")
-#
-#        if self.fanart_tv_user == "":
-#            for i in self.list:
-#                i.update({"clearlogo": "0", "clearart": "0"})
-#
-#    def super_info(self, i):
-#        # if self.list[i]['metacache'] == True: raise Exception()
-#
-##        self.list = convert(self.list)
-#
-#        try:
-#            imdb = self.list[i]["imdb"]
-#        except:
-#            imdb = "0"
-#
-#        item = trakt.getMovieSummary(imdb)
-#
-#        title = item.get("title")
-#        title = client.replaceHTMLCodes(title)
-#
-#        originaltitle = title
-#
-#        year = item.get("year", 0)
-#        year = re.sub("[^0-9]", "", str(year))
-#
-#        imdb = item.get("ids", {}).get("imdb", "0")
-#        imdb = "tt" + re.sub("[^0-9]", "", str(imdb))
-#        tmdb = str(item.get("ids", {}).get("tmdb", 0))
-#
-#        premiered = item.get("released", "0")
-#        try:
-#            premiered = re.compile("(\d{4}-\d{2}-\d{2})").findall(premiered)[0]
-#        except:
-#            premiered = "0"
-#
-#        genre = item.get("genres", [])
-#        genre = [x.title() for x in genre]
-#        genre = " / ".join(genre).strip()
-#        if not genre:
-#            genre = "0"
-#
-#        duration = str(item.get("Runtime", 0))
-#
-#        rating = item.get("rating", "0")
-#        if not rating or rating == "0.0":
-#            rating = "0"
-#
-#        votes = item.get("votes", "0")
-#        try:
-#            votes = str(format(int(votes), ",d"))
-#        except:
-#            pass
-#
-#        mpaa = item.get("certification", "0")
-#        if not mpaa:
-#            mpaa = "0"
-#
-#        tagline = item.get("tagline", "0")
-#
-#        plot = item.get("overview", "0")
-#
-#        people = trakt.getPeople(imdb, "movies")
-#
-#        director = writer = ""
-#        if "crew" in people and "directing" in people["crew"]:
-#            director = ", ".join(
-#                [
-#                    director["person"]["name"]
-#                    for director in people["crew"]["directing"]
-#                    if director["job"].lower() == "director"
-#                ]
-#            )
-#        if "crew" in people and "writing" in people["crew"]:
-#            writer = ", ".join(
-#                [
-#                    writer["person"]["name"]
-#                    for writer in people["crew"]["writing"]
-#                    if writer["job"].lower() in ["writer", "screenplay", "author"]
-#                ]
-#            )
-#
-#        cast = []
-#        for person in people.get("cast", []):
-#            _icon = person['profile_path']
-#            icon = self.tm_img_link % ('185', _icon) if _icon else ''
-#            cast.append(
-#                {"name": person["person"]["name"], 
-#                 "role": person["character"], 
-#                 'thumbnail': icon}
-#            )
-#        cast = [(person["name"], person["role"]) for person in cast]
-#
-#        try:
-#            if self.lang == "en" or self.lang not in item.get(
-#                "available_translations", [self.lang]
-#            ):
-#                raise Exception()
-#
-#            trans_item = trakt.getMovieTranslation(imdb, self.lang, full=True)
-#
-#            title = trans_item.get("title") or title
-#            tagline = trans_item.get("tagline") or tagline
-#            plot = trans_item.get("overview") or plot
-#        except:
-#            pass
-#
-#        try:
-#            artmeta = True
-#            # if self.fanart_tv_user == '': raise Exception()
-#            # TU wszczepić ??????????
-#            # API zadławione
-#            url = self.fanart_tv_art_link % imdb
-#            res = requests.get(
-#                url,
-#                headers=self.fanart_tv_headers,
-#                timeout=10
-#            )
-#
-#
-#            if res is None:
-#                url = self.fanart_tv_art_link % tmdb
-#                res = requests.get(
-#                    url,
-#                    headers=self.fanart_tv_headers,
-#                    timeout=10
-#                )
-##            if art is None: return None
-#
-#            try:
-#                art = json.loads(res.text)
-#                
-#            except:
-#                artmeta = False
-#        except Exception as e:
-#            check = res
-#            print(e)
-#            pass
-#        try:
-#            poster2 = art["movieposter"]
-#            poster2 = (
-#                [x for x in poster2 if x.get("lang") == self.lang][::-1]
-#                + [x for x in poster2 if x.get("lang") == "en"][::-1]
-#                + [x for x in poster2 if x.get("lang") in ["00", ""]][::-1]
-#            )
-#            poster2 = poster2[0]["url"]
-#        except:
-#            poster2 = "0"
-#
-#        try:
-#            if "moviebackground" in art:
-#                fanart = art["moviebackground"]
-#            else:
-#                fanart = art["moviethumb"]
-#            fanart = (
-#                [x for x in fanart if x.get("lang") == self.lang][::-1]
-#                + [x for x in fanart if x.get("lang") == "en"][::-1]
-#                + [x for x in fanart if x.get("lang") in ["00", ""]][::-1]
-#            )
-#            fanart = fanart[0]["url"]
-#        except:
-#            fanart = "0"
-#
-#        try:
-#            banner = art["moviebanner"]
-#            banner = (
-#                [x for x in banner if x.get("lang") == self.lang][::-1]
-#                + [x for x in banner if x.get("lang") == "en"][::-1]
-#                + [x for x in banner if x.get("lang") in ["00", ""]][::-1]
-#            )
-#            banner = banner[0]["url"]
-#        except:
-#            banner = "0"
-#
-#        try:
-#            if "hdmovielogo" in art:
-#                clearlogo = art["hdmovielogo"]
-#            else:
-#                clearlogo = art["clearlogo"]
-#            clearlogo = (
-#                [x for x in clearlogo if x.get("lang") == self.lang][::-1]
-#                + [x for x in clearlogo if x.get("lang") == "en"][::-1]
-#                + [x for x in clearlogo if x.get("lang") in ["00", ""]][::-1]
-#            )
-#            clearlogo = clearlogo[0]["url"]
-#        except:
-#            clearlogo = "0"
-#
-#        try:
-#            if "hdmovieclearart" in art:
-#                clearart = art["hdmovieclearart"]
-#            else:
-#                clearart = art["clearart"]
-#            clearart = (
-#                [x for x in clearart if x.get("lang") == self.lang][::-1]
-#                + [x for x in clearart if x.get("lang") == "en"][::-1]
-#                + [x for x in clearart if x.get("lang") in ["00", ""]][::-1]
-#            )
-#            clearart = clearart[0]["url"]
-#        except:
-#            clearart = "0"
-#
-#        try:
-#            if self.tm_user == "":
-#                raise Exception()
-#
-#            res2 = client.request(self.tm_art_link % imdb, timeout="10", error=True)
-#            art2 = json.loads(res2)
-#        except:
-#            pass
-#
-#        try:
-#            poster3 = art2["posters"]
-#            poster3 = (
-#                [x for x in poster3 if x.get("iso_639_1") == self.lang]
-#                + [x for x in poster3 if x.get("iso_639_1") == "en"]
-#                + [x for x in poster3 if x.get("iso_639_1") not in [self.lang, "en"]]
-#            )
-#            poster3 = [(x["width"], x["file_path"]) for x in poster3]
-#            poster3 = [(x[0], x[1]) if x[0] < 300 else ("300", x[1]) for x in poster3]
-#            poster3 = self.tm_img_link % poster3[0]
-##            poster3 = poster3.encode("utf-8")
-#        except:
-#            poster3 = "0"
-#        try:
-#            fanart2 = art2["backdrops"]
-#            fanart2 = (
-#                [x for x in fanart2 if x.get("iso_639_1") == self.lang]
-#                + [x for x in fanart2 if x.get("iso_639_1") == "en"]
-#                + [x for x in fanart2 if x.get("iso_639_1") not in [self.lang, "en"]]
-#            )
-#            fanart2 = [x for x in fanart2 if x.get("width") == 1920] + [
-#                x for x in fanart2 if x.get("width") < 1920
-#            ]
-#            fanart2 = [(x["width"], x["file_path"]) for x in fanart2]
-#            fanart2 = [(x[0], x[1]) if x[0] < 1280 else ("1280", x[1]) for x in fanart2]
-#            fanart2 = self.tm_img_link % fanart2[0]
-##            fanart2 = fanart2.encode("utf-8")
-#        except:
-#            fanart2 = "0"
-#
-#        item = {
-#            "title": title,
-#            "originaltitle": originaltitle,
-#            "year": year,
-#            "imdb": imdb,
-#            "tmdb": tmdb,
-#            "poster": "0",
-#            "poster2": poster2,
-#            "poster3": poster3,
-#            "banner": banner,
-#            "fanart": fanart,
-#            "fanart2": fanart2,
-#            "clearlogo": clearlogo,
-#            "clearart": clearart,
-#            "premiered": premiered,
-#            "genre": genre,
-#            "duration": duration,
-#            "rating": rating,
-#            "votes": votes,
-#            "mpaa": mpaa,
-#            "director": director,
-#            "writer": writer,
-#            "cast": cast,
-#            "plot": plot,
-#            "tagline": tagline,
-#        }
-#        item = dict((k, v) for k, v in item.items() if not v == "0")
-#        self.list[i].update(item)
-#
-#        if artmeta == False:
-#            raise Exception()
-#
-#        meta = {
-#            "imdb": imdb,
-#            "tmdb": tmdb,
-#            "tvdb": "0",
-#            "lang": self.lang,
-#            "user": self.user,
-#            "item": item,
-#        }
-#        self.meta.append(meta)
-
     def movieDirectory(self, items):
         if items == None or len(items) == 0:
             control.idle()
@@ -2608,10 +2335,10 @@ class movies:
                     meta.update({"duration": str(int(meta["duration"]) * 60)})
                 except:
                     pass
-                try:
-                    meta.update({"genre": cleangenre.lang(meta["genre"], self.lang)})
-                except:
-                    pass
+                # try:
+                #     meta.update({"genre": cleangenre.lang(meta["genre"], self.lang)})
+                # except:
+                #     pass
 
                 poster = [
                     i[x]

@@ -18,6 +18,7 @@
 """
 
 import urllib
+import requests
 
 try:
     import urllib.parse as urllib
@@ -40,6 +41,22 @@ class source:
         self.search_link_ep = "video/show/%s?duration=srednie&section=&quality=720p&section=&s=best&section="
         self.anime = False
         self.year = 0
+        self.headers = {
+                        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:95.0) Gecko/20100101 Firefox/95.0',
+                        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/jxl,image/webp,*/*;q=0.8',
+                        'Accept-Language': 'pl,en-US;q=0.7,en;q=0.3',
+                        'Accept-Encoding': 'gzip, deflate, br',
+                        'DNT': '1',
+                        'Connection': 'keep-alive',
+                        'Upgrade-Insecure-Requests': '1',
+                        'Sec-Fetch-Dest': 'document',
+                        'Sec-Fetch-Mode': 'navigate',
+                        'Sec-Fetch-Site': 'same-origin',
+                        'Sec-Fetch-User': '?1',
+                        'Pragma': 'no-cache',
+                        'Cache-Control': 'no-cache',
+                        'TE': 'trailers',
+                    }
 
     def contains_word(self, str_to_check, word):
         if str(word).lower() in str(str_to_check).lower():
@@ -76,13 +93,22 @@ class source:
             titles.append(cleantitle.normalize(cleantitle.getsearch(title)))
             titles.append(cleantitle.normalize(cleantitle.getsearch(localtitle)))
             linki = []
+            session = requests.session()
+            session.get('https://cda.pl')
 
             for title in titles:
                 try:
                     url = urllib.urljoin(self.base_link, self.search_link)
                     url = url % urllib.quote(str(title).replace(" ", "_"))
 
-                    result = client.request(url)
+                    self.headers.update({'Referer': url})
+
+                    result = session.get(url, headers=self.headers).text
+
+                    # NB. Original query string below. It seems impossible to parse and
+                    # reproduce query strings 100% accurately so the one below is given
+                    # in case the reproduced version is not "correct".
+                    # response = requests.get('https://www.cda.pl/video/show/w%C5%82adca_pier%C5%9Bcieni?duration=srednie&section=&quality=720p&section=&s=best&section=', headers=headers, cookies=cookies)
                     result = client.parseDOM(
                         result, "div", attrs={"class": "video-clip-wrapper"}
                     )
@@ -129,12 +155,18 @@ class source:
             titles.append(cleantitle.normalize(cleantitle.getsearch(title2)))
             linki = []
 
+            session = requests.session()
+            session.get('https://cda.pl')
+
             for title in titles:
                 try:
                     url = urllib.urljoin(self.base_link, self.search_link_ep)
                     url = url % urllib.quote(str(title).replace(" ", "_"))
 
-                    result = client.request(url)
+                    self.headers.update({'Referer': url})
+
+                    result = session.get(url, headers=self.headers).text
+
                     result = client.parseDOM(
                         result, "div", attrs={"class": "video-clip-wrapper"}
                     )
@@ -173,6 +205,7 @@ class source:
                         return sources
                     url = urllib.urljoin(self.base_link, url)
                     result = client.request(url)
+                    result2 = client.request("https://ebd.cda.pl/647x500/" + url.split("/")[-1] + "/vfilm")
                     title = client.parseDOM(
                         result, "span", attrs={"style": "margin-right: 3px;"}
                     )[0]
@@ -180,7 +213,7 @@ class source:
                     valid, host = source_utils.is_host_valid(url, hostDict)
                     if not valid:
                         continue
-                    if "?wersja=1080p" in result:
+                    if "1080p" in result2:
                         sources.append(
                             {
                                 "source": host,
@@ -192,7 +225,7 @@ class source:
                                 "debridonly": False,
                             }
                         )
-                    if "?wersja=720p" in result:
+                    if "720p" in result2:
                         sources.append(
                             {
                                 "source": host,
@@ -204,7 +237,7 @@ class source:
                                 "debridonly": False,
                             }
                         )
-                    if "?wersja=480p" in result:
+                    if "480p" in result2:
                         sources.append(
                             {
                                 "source": host,

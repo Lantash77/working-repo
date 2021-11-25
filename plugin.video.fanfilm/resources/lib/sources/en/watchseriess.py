@@ -6,7 +6,6 @@
 """
 
 from urllib.parse import urljoin
-
 from ptw.libraries import cleantitle
 from ptw.libraries import client
 from ptw.libraries import debrid

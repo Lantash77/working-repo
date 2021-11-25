@@ -119,7 +119,7 @@ if int(control.setting("schedTraktTime")) > 0:
     schedTrakt = threading.Timer(timeout, syncTraktLibrary)
     schedTrakt.start()
 
-if control.setting("autoCleanCache") == "true":
+if control.setting("autoCleanCacheAll") == "true":
     cache.cache_clear_all()
     log_utils.log(
         "######################### FANFILM ############################",

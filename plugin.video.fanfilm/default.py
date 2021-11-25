@@ -30,9 +30,7 @@ ladowanie = control.setting("ladowanie")
 params = dict(parse_qsl(sys.argv[2].replace("?", "")))
 
 action = params.get("action")
-sys.path.append("C:\Program Files\JetBrains\PyCharm 2021.2.2\debug-eggs\pydevd-pycharm.egg")
-import pydevd_pycharm
-pydevd_pycharm.settrace('localhost', port=5678, stdoutToServer=True, stderrToServer=True)
+
 @contextmanager
 def busy_dialog():
     try:
@@ -594,7 +592,7 @@ with busy_dialog():
     elif action == "tvshowToLibrary":
         from ptw.libraries import libtools
 
-        libtools.libtvshows().add(tvshowtitle, year, imdb, tvdb)
+        libtools.libtvshows().add(tvshowtitle, year, imdb, tvdb, season, episode, meta)
 
     elif action == "tvshowsToLibrary":
         from ptw.libraries import libtools

@@ -2130,7 +2130,7 @@ class sources:
         if content == "movie":
             t = trakt.getMovieTranslation(imdb, lang)
         else:
-            t = tvmaze.tvMaze().getTVShowTranslation(tvdb, lang)
+            t = trakt.getTVShowTranslation(imdb, lang)
 
         return t or title
 
