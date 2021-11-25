@@ -61,7 +61,9 @@ class seasons:
         self.today_date = self.datetime.strftime('%Y-%m-%d')
         self.lang = control.apiLanguage()['tmdb'] or 'en'
 
-        self.tm_user = apis.tmdb_API# or control.setting('tm.user') #do przerobienia
+#        self.tm_user = apis.tmdb_API
+        self.tm_user = control.setting("tm.user")
+        if not self.tm_user: self.tm_user = apis.tmdb_API    
         self.tmdb_show_link = 'https://api.themoviedb.org/3/tv/%s?api_key=%s&language=%s&append_to_response=aggregate_credits,content_ratings,external_ids' % ('%s', self.tm_user, '%s')
         self.tmdb_show_lite_link = 'https://api.themoviedb.org/3/tv/%s?api_key=%s&language=en' % ('%s', self.tm_user)
         self.tmdb_by_imdb = 'https://api.themoviedb.org/3/find/%s?api_key=%s&external_source=imdb_id' % ('%s', self.tm_user)
@@ -502,7 +504,9 @@ class episodes:
         self.items_per_page = str(control.setting("items.per.page")) or "20"
         self.trailer_source = "1"# control.setting('trailer.source') or '1'
 
-        self.tm_user = control.setting("tm.user") or apis.tmdb_key
+#        self.tm_user = control.setting("tm.user") or apis.tmdb_key
+        self.tm_user = control.setting("tm.user")
+        if not self.tm_user: self.tm_user = apis.tmdb_API    
         self.tmdb_season_link = "https://api.themoviedb.org/3/tv/%s/season/%s?api_key=%s&language=%s&append_to_response=aggregate_credits" % ("%s", "%s", self.tm_user, "%s")
         self.tmdb_season_lite_link = "https://api.themoviedb.org/3/tv/%s/season/%s?api_key=%s&language=en" % ("%s", "%s", self.tm_user)
         self.tmdb_episode_link = "https://api.themoviedb.org/3/tv/%s/season/%s/episode/%s?api_key=%s&language=%s&append_to_response=credits" % ("%s", "%s", "%s", self.tm_user, self.lang)
@@ -513,7 +517,14 @@ class episodes:
         self.tmdb_show_lite_link = 'https://api.themoviedb.org/3/tv/%s?api_key=%s&language=en' % ('%s', self.tm_user)
 
         self.fanart_tv_art_link = "http://webservice.fanart.tv/v3/tv/%s"
+#        self.fanart_tv_user = apis.fanarttv_client_key#control.setting("fanart.tv.user")
         self.fanart_tv_user = control.setting("fanart.tv.user")
+        if not self.fanart_tv_user: self.fanart_tv_user = apis.fanarttv_client_key
+        self.fanart_tv_API = control.setting("fanart.tv.dev")
+        if not self.fanart_tv_API: self.fanart_tv_API = apis.fanarttv_API_key
+        self.fanart_tv_headers = {"api-key": self.fanart_tv_API}        
+        if not self.fanart_tv_user == '':
+            self.fanart_tv_headers.update({'client-key': self.fanart_tv_user})
 
         self.added_link = "https://api.tvmaze.com/schedule"
         #https://api.trakt.tv/calendars/all/shows/date[30]/31 #use this for new episodes?
@@ -1304,10 +1315,11 @@ class episodes:
 
         try:
             #if self.fanart_tv_user == '': raise Exception()
-            fanart_tv_headers = {'api-key': apis.fanarttv_key}
-            if not self.fanart_tv_user == '':
-                fanart_tv_headers.update({'client-key': self.fanart_tv_user})
-            r = self.session.get(self.fanart_tv_art_link % tvdb, headers=fanart_tv_headers, timeout=10)
+#            fanart_tv_headers = {'api-key': apis.fanarttv_key}
+#            if not self.fanart_tv_user == '':
+#                fanart_tv_headers.update({'client-key': self.fanart_tv_user})
+            
+            r = self.session.get(self.fanart_tv_art_link % tvdb, headers=self.fanart_tv_headers, timeout=10)
             r.raise_for_status()
             r.encoding = 'utf-8'
             art = r.json()# if six.PY3 else utils.json_loads_as_str(r.text)
