@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<addons>
+<addon id="plugin.video.fanfilm" name="FanFilm" version="2021.11.25.4" provider-name="-">
+    <requires>
+        <import addon="xbmc.python" version="3.0.0"/>
+        <import addon="script.module.ptw" version="2021.02.28.1"/>
+        <import addon="script.module.requests"/>
+        <import addon="script.module.metahandler" version="5.0.0"/>
+        <import addon="script.module.beautifulsoup4"/>
+        <import addon="script.module.future"/>
+        <import addon="plugin.video.youtube"/>
+        <import addon="script.module.resolveurl"/>
+        <import addon="script.module.six" />
+        <import addon="script.module.kodi-six" />
+        <import addon="script.fanfilm.media" version="2021.03.07.1"/>
+        <import addon="script.fanfilm.metadata" version="2021.03.07.0"/>
+    </requires>
+    <extension point="xbmc.python.pluginsource" library="default.py">
+        <provides>video</provides>
+    </extension>
+    <extension point="xbmc.service" library="service.py" start="startup"/>
+    <extension point="xbmc.addon.metadata">
+        <summary lang="pl">FanFilm</summary>
+        <description lang="pl">Plugin z filmami i serialami.</description>
+        <platform>all</platform>
+        <assets>
+            <icon>icon.png</icon>
+        </assets>
+		<news>
+Changelog:
+2021.11.24.3
+- nazwy seriali po polsku i spłaszczanie sezonów
+2021.11.24.1
+- fix czyszczenia cache
+2021.11.23.0
+- dodano skanowanie folderu pobierania
+  sprawdza czy materiał nie został już pobrany
+2021.11.22.2
+- fix seriali i filman
+2021.11.21.5
+- napraw brakujacych/żle wyświetlanych tytułów
+2021.11.21.4
+- naprawa biblioteki seriali
+- zmiana priorytetu plakatów
+2021.11.21.2
+- meta fix
+2021.11.21.1
+- Poprawka do cda
+- Dwa nowe(stare) źródła filman i horrory
+- Upgrade wtyczki
+2021.11.12
+- Netflix
+  Sprawdzenie czy wtyczka jest zainstalowana
+  W przypadku braku - pomija źródło
+  wyłaczenie skanowania seriali
+2021.11.05
+- Nowe źródło Netflix
+  wtyczka sprawdza czy film jest dostepny na Netflix
+  do pracy potrzebna zainstalowana i zalogowana wtyczka Netflix
+2021.10.21
+- Synchronizacja Trakt.tv fix
+  Nowe Api
+  poprawiono listę postępu seriali
+  aktualizacja do Trakt
+- zmiana dostawcy z tvdb na tmdb/fanart.tv
+  grafiki, opisy filmów i seriali
+  cleararty :)
+		</news>
+    </extension>
+    <reuselanguageinvoker>true</reuselanguageinvoker>
+</addon>
+
+<addon id="plugin.video.vikirakuten" name="VIKI Rakuten®" version="0.0.0.2" provider-name="Lantash">
+  <requires>
+	<import addon="xbmc.python" version="3.0.0"/>
+	<import addon="inputstream.adaptive" version="2.1.0"/>
+	<import addon="script.module.requests" version="2.22.0"/>
+	<import addon="script.module.inputstreamhelper" version="0.3.3"/>
+	<import addon="script.module.youtube.dl" version="21.303.0+matrix.1"/>
+    <import addon="script.module.six" />
+  </requires>
+  <extension point="xbmc.python.pluginsource" library="addon.py">
+  	<provides>video</provides>
+  </extension>
+  <extension point="xbmc.addon.metadata">
+  	<summary lang="pl">VIKI.COM FILMY OD FANÓW DLA FANÓW</summary>
+  	<summary lang="en">VIKI.COM GLOBAL TV POWERED BY FANS</summary>
+  	<description lang="bg">[B][COLOR red]Przed użyciem ustaw swoje preferencje w ustawieniach dodatku![/B][/COLOR] Na VIKI.COM oglądaj najlepsze światowe programy telewizyjne, filmy, wiadomości rozrywkowe i inne treści premium w wysokiej jakości, przetłumaczone na ponad 150 języków przez społeczność zapalonych fanów. Razem przełamujemy bariery, które stoją między świetną rozrywką a jej fanami, bez względu na to, gdzie się znajdują!</description>
+  	<description lang="en">[B][COLOR red]Before use, set your preferences in the addon settings![/B][/COLOR] In VIKI.COM watch the best global TV shows, movies, entertainment news and other premium content in high quality, translated into more than 150 languages by a community of avid fans. Together, we’re breaking down barriers that stand between great entertainment and its fans, no matter where they are!</description>
+  	<disclaimer lang="pl">To nie jest oficjalny dodatek! Jeśli oficjalna aplikacja jest dostępna dla Twojej platformy, użyj jej zamiast tego dodatku. Wszelkie prawa dotyczące treści są zastrzeżone przez Rakuten.</disclaimer>
+  	<disclaimer lang="en">This is not an official addon! If the official APP is available for your platform, use it instead of this addon. All rights on content are reserved by Rakuten.</disclaimer>
+  	<language>en</language>
+  	<platform>all</platform>
+    <license>GNU GENERAL PUBLIC LICENSE. Version 2, June 1991</license>
+  	<forum>https://kodibg.org/forum/thread-209.html</forum>
+  	<website>https://www.viki.com</website>
+  	<news>
+		Pierwsza wersja
+	</news>
+	<assets>
+	   <icon>resources/icon.png</icon>
+       <fanart>resources/fanart.jpg</fanart>
+       <screenshot>resources/screenshot-01.jpg</screenshot>
+       <screenshot>resources/screenshot-02.jpg</screenshot>
+       <screenshot>resources/screenshot-03.jpg</screenshot>
+	</assets>
+  </extension>
+</addon>
+
+<addon id="script.module.ptw" name="PTW Module" version="2021.11.24.1" provider-name="PTW">
+    <requires>
+        <import addon="xbmc.python" version="3.0.0"/>
+        <import addon="script.module.beautifulsoup4"/>
+        <import addon="script.module.requests"/>
+        <import addon="script.module.resolveurl"/>
+        <import addon="script.module.six" />
+        <import addon="script.module.kodi-six" />
+        <import addon="script.module.pyxbmct"/>
+        <import addon="script.module.future"/>
+        <import addon="script.module.js2py" version="0.7.0"/>
+        <import addon="plugin.video.youtube"/>
+    </requires>
+    <extension point="xbmc.python.module" library="lib"/>
+    <extension point="xbmc.service" library="service.py" start="startup"/>
+    <extension point="xbmc.addon.metadata">
+        <platform>all</platform>
+        <summary lang="en">PTW</summary>
+        <reuselanguageinvoker>true</reuselanguageinvoker>
+    </extension>
+</addon>
+</addons>
