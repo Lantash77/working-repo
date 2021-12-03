@@ -15,12 +15,12 @@ my_addon = xbmcaddon.Addon()
 translang = my_addon.getLocalizedString
 my_addon_id = my_addon.getAddonInfo('id')
 my_addon_name = my_addon.getAddonInfo("name")
-DATA_PATH = xbmcvfs.translatePath(my_addon.getAddonInfo("profile")) or 'D:\drop'
+DATA_PATH = xbmcvfs.translatePath(my_addon.getAddonInfo("profile"))# or 'D:\drop'
 ADDON_PATH = my_addon.getAddonInfo('path')
 MEDIA_PATH = xbmcvfs.translatePath(ADDON_PATH + "resources/media/")
 addonIcon = xbmcvfs.translatePath(ADDON_PATH + "resources/")+ 'icon.png'
-searchFile = os.path.join(DATA_PATH, "search.1.db")
-srtsubs_path = xbmcvfs.translatePath('special://temp/vikir.English.srt')
+searchFile = os.path.join(DATA_PATH, "search.db")
+srtsubs_path = xbmcvfs.translatePath('special://temp/vikirakuten.English.srt')
 
 dialog = xbmcgui.Dialog()
 

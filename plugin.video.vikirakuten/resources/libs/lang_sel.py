@@ -8,9 +8,11 @@ import xbmcaddon
 
 my_addon = xbmcaddon.Addon()
 my_addon_id = my_addon.getAddonInfo('id')
-getsetting = my_addon.getSetting
+getSetting = my_addon.getSetting
+setSetting = my_addon.setSetting
+sublang = getSetting('lang')
 
-sublang = getsetting('lang')
+
 
 if sublang == '0':
     lang = 'en'
