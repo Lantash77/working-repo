@@ -70,7 +70,7 @@ Changelog:
     <reuselanguageinvoker>true</reuselanguageinvoker>
 </addon>
 
-<addon id="plugin.video.vikirakuten" name="VIKI Rakuten®" version="0.0.0.2" provider-name="Lantash">
+<addon id="plugin.video.vikirakuten" name="VIKI Rakuten®" version="0.0.0.3" provider-name="Lantash">
   <requires>
 	<import addon="xbmc.python" version="3.0.0"/>
 	<import addon="inputstream.adaptive" version="2.1.0"/>
