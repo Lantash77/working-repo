@@ -12,7 +12,7 @@ import json
 from urllib.parse import parse_qsl, quote_plus, urlparse, urlunparse, parse_qs, urlencode
 import urllib.request, urllib.error
 from urllib.error import URLError, HTTPError
-import lang_sel
+from resources.libs import lang_sel
 import requests
 from hashlib import sha1
 import hmac
@@ -22,13 +22,20 @@ import xbmc
 import xbmcgui
 import xbmcplugin
 import xbmcaddon
+import xbmcgui
 import xbmcvfs
-#import inputstreamhelper
-#import YDStreamExtractor
+import inputstreamhelper
+import YDStreamExtractor
+
 
 from resources.libs import common
+from resources.libs import utils
 
-__settings__ = lang_sel.getsetting
+#sys.path.append("C:\Program Files\JetBrains\PyCharm 2019.2.6\debug-eggs\pydevd-pycharm.egg")
+#import pydevd_pycharm
+#pydevd_pycharm.settrace('localhost', port=5678, stdoutToServer=True, stderrToServer=True)
+
+__settings__ = lang_sel.getSetting
 my_addon = common.my_addon
 my_addon_id = common.my_addon_id
 ADDON_PATH = common.ADDON_PATH
@@ -41,6 +48,13 @@ UA = 'Mozilla/5.0 (Macintosh; MacOS X10_14_3; rv;93.0) Gecko/20100101 Firefox/93
 header = {'user-agent': UA}
 headmobile = {'user-agent': MUA}
 SEARCH_URL = 'https://api.viki.io/v4/search.json?page=1&per_page=50&app=100000a&term='
+BASE_MOVIE_URL = 'https://api.viki.io/v4/movies.json?%s'
+BASE_SERIES_URL = 'https://api.viki.io/v4/series.json?%s'
+system_lang = xbmc.getLanguage()
+params = dict(parse_qsl(sys.argv[2].replace("?", "")))
+
+VikiAPI = utils.VikiAPI()
+
 #Dostosuj jakość wideo
 quality =__settings__('quality')
 
@@ -52,8 +66,8 @@ debug =__settings__('debug')
 
 #Ustaw kolejność odcinków
 d =__settings__('direction')
-if d == '0': d = 'desc'
-elif d == '1': d = 'asc'
+if d == '0': order = '&direction=desc'
+elif d == '1': order = '&direction=asc'
 
 #Ustaw język napisów
 se = __settings__('se')
@@ -63,114 +77,132 @@ language = lang_sel.language
 
 #Menu z katalogami we wtyczce
 def CATEGORIES():
-    addDir(32010,'','','search',md+'DefaultAddonsSearch.png') #Search
-    addLink('Play video by ID','loadbyid','0','True','','','G','5.0','loadID',md+'DefaultStudios.png')
-    addDir('Browse Movies by Genre','movies','','genre',md+'DefaultFolder.png')
+    addDir('Search','','search','',md+'DefaultAddonsSearch.png') #Search32010
+
+    addDir('Browse Movies by Genre','movies','genre','',md+'DefaultFolder.png')
     addDir('Browse Movies by Country','movies','','country',md+'DefaultFolder.png')
-    addDir('New Movies','https://api.viki.io/v4/movies.json?sort=newest_video&page=1&per_page=50&app=100000a&t=','','index',md+'DefaultFolder.png')
-    addDir('Recent Movies','https://api.viki.io/v4/movies.json?sort=views_recent&page=1&per_page=50&app=100000a&t=','','index',md+'DefaultFolder.png')
-    addDir('Popular Movies','https://api.viki.io/v4/movies.json?sort=trending&page=1&per_page=50&app=100000a&t=','','index',md+'DefaultFolder.png')
-    addDir('Best Movies','https://api.viki.io/v4/movies.json?sort=views&page=1&per_page=50&app=100000a&t=','','index',md+'DefaultFolder.png')
-    addDir('Browse Series by Genre','series','','genre',md+'DefaultFolder.png')
-    addDir('Browse Series by Country','series','','country',md+'DefaultFolder.png')
-    addDir('New Series','https://api.viki.io/v4/series.json?sort=newest_video&page=1&per_page=50&app=100000a&t=','','index',md+'DefaultFolder.png')
-    addDir('Recent Series','https://api.viki.io/v4/series.json?sort=views_recent&page=1&per_page=50&app=100000a&t=','','index',md+'DefaultFolder.png')
-    addDir('Popular Series','https://api.viki.io/v4/series.json?sort=trending&page=1&per_page=50&app=100000a&t=','','index',md+'DefaultFolder.png')
-    addDir('Best Series','https://api.viki.io/v4/series.json?sort=views&page=1&per_page=50&app=100000a&t=','','index',md+'DefaultFolder.png')
-    addDir('Latest Clips','https://api.viki.io/v4/clips.json?sort=newest_video&page=1&per_page=50&app=100000a&t=','','index',md+'DefaultFolder.png')
+    addDir('New Movies', BASE_MOVIE_URL % 'sort=newest_video&page=1&per_page=50&app=100000a&t=','index','',md+'DefaultFolder.png')
+    addDir('Recent Movies',BASE_MOVIE_URL % 'sort=views_recent&page=1&per_page=50&app=100000a&t=','index','',md+'DefaultFolder.png')
+    addDir('Popular Movies',BASE_MOVIE_URL % 'sort=trending&page=1&per_page=50&app=100000a&t=','index','',md+'DefaultFolder.png')
+    addDir('Best Movies',BASE_MOVIE_URL % 'sort=views&page=1&per_page=50&app=100000a&t=','index','',md+'DefaultFolder.png')
+    addDir('Browse Series by Genre','series','genre','',md+'DefaultFolder.png')
+    addDir('Browse Series by Country','series','country','',md+'DefaultFolder.png')
+    addDir('New Series',BASE_SERIES_URL % 'sort=newest_video&page=1&per_page=50&app=100000a&t=','index','',md+'DefaultFolder.png')
+    addDir('Recent Series',BASE_SERIES_URL % 'sort=views_recent&page=1&per_page=50&app=100000a&t=','index','',md+'DefaultFolder.png')
+    addDir('Popular Series',BASE_SERIES_URL % 'sort=trending&page=1&per_page=50&app=100000a&t=','index','',md+'DefaultFolder.png')
+    addDir('Best Series',BASE_SERIES_URL % 'sort=views&page=1&per_page=50&app=100000a&t=','index','',md+'DefaultFolder.png')
+    addDir('Latest Clips',BASE_SERIES_URL % 'sort=newest_video&page=1&per_page=50&app=100000a&t=','index','',md+'DefaultFolder.png')
 
 #Przewiń tytuły przesłanej strony
 def INDEX(url):
-    url = 'https://api.viki.io/v4/movies.json?sort=newest_video&page=1&per_page=50&app=100000a&t='
-    #testy linki itp
-
-
 
     ################
     timestamp = str(int(time.time()))
 
-    #############
-    print(url)
+    try:
+        if 'search.json' in url:
+            jsonrsp = requests.get(url, headers=header, timeout=5).json()
+        else:
+            jsonrsp = requests.get(url+timestamp, headers=header, timeout=5).json()
 
-    #############
-    if 'search.json' in url:
-        jsonrsp = requests.get(url, headers=header, timeout=5).json()
-    else:
-        jsonrsp = requests.get(url+timestamp, headers=header, timeout=5).json()
 
-    print (jsonrsp['response'][0]['titles']['en'])
+        print (jsonrsp['response'][0]['titles']['en'])
 
     #Rozpocznij indeksowanie
-    for movie in range(0, len(jsonrsp['response'])):
-        try:
-            if (jsonrsp['response'][movie]['flags']['licensed'] == True or fc == 'true' or debug == 'true'): #Ако заглавието е лицензирано или са разрешени Фен каналите/дебъг режима
-                if jsonrsp['response'][movie]['type'] == 'series': #Jeśli to seria
-                    try: #Tytuł w języku angielskim
-                        mt = str(jsonrsp['response'][movie]['titles']['en']).encode('utf-8', 'ignore')
-                    except:
-                        mt = 'TV Show Title'
-                    try: #Opis w języku angielskim
-                        mdes = str(jsonrsp['response'][movie]['descriptions']['en']).encode('utf-8', 'ignore')
-                    except:
-                        mdes = ''
-                    try: #Poster
-                        pos = jsonrsp['response'][movie]['images']['poster']['url']
-                    except:
-                        pos = ''
-    ##############pod Pycharm
-    #				xbmcplugin.setContent(int(sys.argv[1]), 'season')
-    #				addDir(mt,'https://api.viki.io/v4/series/'+jsonrsp['response'][movie]['id']+'/episodes.json?page=1&per_page=50&app=100000a&t='+timestamp,mdes,'prepare',pos)
-    ##############
-                else: #Jeśli jest to film fabularny lub wideo
-                    if (jsonrsp['response'][movie]['blocked'] == False or debug == 'true'): #Проверка за достъпност
-                        try: #Napisy w języku podstawowym
-                            subtitle_completion1 = str(jsonrsp['response'][movie]['subtitle_completions'][lang], 'utf-8', 'ignore')
+        for movie in range(0, len(jsonrsp['response'])):
+                data = jsonrsp['response'][movie]
+            # Jeśli tytuł jest licencjonowany lub włączony jest tryb Fan Channels / Debug
+                if (data['flags']['licensed'] == True or fc == 'true' or debug == 'true'):
+                    if data['type'] == 'series': #Jeśli to seria
+                        try: #Tytuł w języku angielskim
+                            mt = str(data['titles']['en'])
                         except:
-                            subtitle_completion1 = '0'
-                        try: #angielskie napisy
-                            subtitle_completion2 = str(jsonrsp['response'][movie]['subtitle_completions']['en'], 'utf-8', 'ignore')
+                            mt = 'TV Show Title'
+                        try: #Opis w języku angielskim
+                            mdes = str(data['descriptions']['en'])
                         except:
-                            subtitle_completion2 = '0'
-                        try: #Czas trwania filmu
-                            dur = str(jsonrsp['response'][movie]['duration'])
-                        except:
-                            dur = ''
-                        try: #Rozdzielczość wideo
-                            hd = str(jsonrsp['response'][movie]['flags']['hd'])
-                        except:
-                            hd = 'False'
-                        try: #Nazwa / opis filmu
-                            mt = str(jsonrsp['response'][movie]['titles']['en'])
-                        except:
-                            mt = 'Movie Title'
-                        try: #Autor / Studio
-                            at = str(jsonrsp['response'][movie]['author'], 'utf-8', 'ignore')
-                        except:
-                            at = ''
-                        try: #Movie ID
-                            mid = str(jsonrsp['response'][movie]['id'])
-                        except:
-                            mid = ''
+                            mdes = ''
                         try: #Poster
-                            pos = str(jsonrsp['response'][movie]['images']['poster']['url'])
+                            pos = data['images']['poster']['url']
                         except:
                             pos = ''
-                        try: #Ocena
-                            rating = jsonrsp['response'][movie]['rating']
+                        try:
+                            origin_country = data['origin']
                         except:
-                            rating = 'G'
-                        try: #Stopień
-                            ar = str(jsonrsp['response'][movie]['container']['review_stats']['average_rating'])
+                            origin_country = ''
+                        try:
+                            year = re.search(r'[0-9]{4}', data['created_at']).group(0)
                         except:
-                            ar = '0'
-    #################
+                            year = ''
+                        try:  # Napisy lokalne
+                            subs_local = str(data['subtitle_completions'][lang])
+                        except:
+                            subs_local = '0'
 
-    #					xbmcplugin.setContent(int(sys.argv[1]), 'movie')
-    #					addLink(mt,mid+'@'+pos+'@'+subtitle_completion1+'@'+subtitle_completion2+'@'+mt,dur,hd,mt,at,rating,ar,'play',pos)
-    #######################
-                        #addLink(jsonrsp['response'][movie]['titles']['en'],jsonrsp['response'][movie]['id']+'@'+jsonrsp['response'][movie]['images']['poster']['url']+'@'+subtitle_completion1+'@'+subtitle_completion2,jsonrsp['response'][movie]['duration'],hd,mt,at,rating,ar,4,jsonrsp['response'][movie]['images']['poster']['url'])
-        except:
-            xbmc.executebuiltin('Notification(%s, %s, %d, %s)'%('VIKI®','Error in INDEX Function', 4000, md+'DefaultIconError.png'))
+                        xbmcplugin.setContent(int(sys.argv[1]), 'season')
+
+                        meta = {
+                            'title': mt,
+                            'original_title': '',
+                            'origin_country': origin_country,
+                            'year': year,
+                            'local_subtitle': subs_local,
+                            'plot': mdes,
+                            'poster': pos,
+                        }
+
+                        addDir(mt,'https://api.viki.io/v4/series/'+data['id']+'/episodes.json?page=1&per_page=50&app=100000a&t='+timestamp,'prepare',mdes,pos,code=subs_local)
+
+                    else: #Jeśli jest to film fabularny lub wideo
+                        if (data['blocked'] == False or debug == 'true'): #Проверка за достъпност
+                            try: #Napisy lokalne
+                                subs_local = str(data['subtitle_completions'][lang])
+                            except:
+                                subs_local = '0'
+                            try: #angielskie napisy
+                                subs_en = str(data['subtitle_completions']['en'])
+                            except:
+                                subs_en = '0'
+                            try: #Czas trwania filmu
+                                dur = str(data['duration'])
+                            except:
+                                dur = ''
+                            try: #Rozdzielczość wideo
+                                hd = str(data['flags']['hd'])
+                            except:
+                                hd = 'False'
+                            try: #Nazwa / opis filmu
+                                mt = str(data['titles']['en'])
+                            except:
+                                mt = 'Movie Title'
+                            try: #Autor / Studio
+                                at = str(data['author'])
+                            except:
+                                at = ''
+                            try: #Movie ID
+                                mid = str(data['id'])
+                            except:
+                                mid = ''
+                            try: #Poster
+                                pos = str(data['images']['poster']['url'])
+                            except:
+                                pos = ''
+                            try: #Ocena
+                                rating = data['rating']
+                            except:
+                                rating = 'G'
+                            try: #Stopień
+                                ar = str(data['container']['review_stats']['average_rating'])
+                            except:
+                                ar = '0'
+                            xbmcplugin.setContent(int(sys.argv[1]), 'movie')
+
+                            addLink(mt,mid+'@'+pos+'@'+subs_local+'@'+subs_en+'@'+mt,dur,hd,mt,at,rating,ar,'play',pos)
+        #######################
+
+    except:
+        pass
+        #xbmc.executebuiltin('Notification(%s, %s, %d, %s)'%('VIKI®','Error in INDEX Function', 4000, md+'DefaultIconError.png'))
     #Koniec indeksowania
 
     #next page...
@@ -179,128 +211,120 @@ def INDEX(url):
         fronturl, page, backurl = re.findall('(.+?)&page=(.+?)&per_page=(.+?)&t=', url)[0]
         newpage = int(page) + 1
         url = fronturl + '&page=' + str(newpage) + '&per_page=' + backurl + '&t='
-        addDir('Next page >>', url, '', 'index', md + 'DefaultFolder.png')
+        addDir('Next page >>', url, 'index', '', md + 'DefaultFolder.png')
 
 #Przeglądanie odcinków serialu
 def PREPARE(url):
 
     xbmcplugin.setContent(int(sys.argv[1]), 'episode')
     timestamp = str(int(time.time()))
-    #print url
-    req = urllib.request.Request(url+'&direction='+d) #Ustaw kolejność odcinków
-    req.add_header('User-Agent', UA)
-    opener = urllib.request.build_opener()
-    f = opener.open(req)
-    jsonrsp = json.loads(f.read())
+    jsonrsp = requests.get(url + order, headers=header).json()
+
     #print (jsonrsp)
 
     #Rozpocznij indeksowanie
     for episode in range(0, len(jsonrsp['response'])):
+        data = jsonrsp['response'][episode]
         try:
-            if (jsonrsp['response'][episode]['blocked'] == False or debug == 'true'): #Kontrola dostępności — zablokowana lub nie
+            if (data['blocked'] == False or debug == 'true'): #Kontrola dostępności — zablokowana lub nie
                 try: #Nazwa serii
-                    tsn = str(jsonrsp['response'][episode]['container']['titles']['en'])
+                    tsn = str(data['container']['titles']['en'])
                 except:
                     tsn = ''
                 try: #Numer odcinka serialu
-                    en = str(jsonrsp['response'][episode]['number'])
+                    ep = ' Episode ' + str(data['number'])
                 except:
-                    en = ''
+                    ep = ''
                 try: #Identyfikator odcinka
-                    ide = str(jsonrsp['response'][episode]['id'])
+                    video_id = str(data['id'])
                 except:
-                    ide = ''
+                    video_id = ''
                 try: #Poster URL
-                    pos = str(jsonrsp['response'][episode]['images']['poster']['url'])
+                    pos = str(data['images']['poster']['url'])
                 except:
                     pos = ''
                 try: #Duration
-                    dur = str(jsonrsp['response'][episode]['duration'])
+                    dur = str(data['duration'])
                 except:
                     dur = ''
                 try: #Średnia ocena
-                    ar = str(jsonrsp['response'][episode]['container']['review_stats']['average_rating'])
+                    ar = str(data['container']['review_stats']['average_rating'])
                 except:
                     ar = ''
-                try: #Napisy w języku podstawowym
-                    subtitle_completion1 = str(jsonrsp['response'][episode]['subtitle_completions'][lang])
+                try: #Napisy lokalne
+                    subs_local = str(data['subtitle_completions'][lang])
                 except:
-                    subtitle_completion1 = '0'
+                    subs_local = '0'
                 try: #angielskie napisy
-                    subtitle_completion2 = str(jsonrsp['response'][episode]['subtitle_completions']['en'])
+                    subs_en = str(data['subtitle_completions']['en'])
                 except:
-                    subtitle_completion2 = '0'
+                    subs_en = '0'
                 try: #Rozdzielczość wideo
-                    hd = str(jsonrsp['response'][episode]['flags']['hd'])
+                    hd = str(data['flags']['hd'])
                 except:
                     hd = 'False'
                 try: #Nazwa / opis odcinka
-                    et = str(jsonrsp['response'][episode]['titles'][lang])
+                    et = str(data['titles'][lang])
                 except:
                     et = ''
                 try: #Autor / Studio
-                    at = str(jsonrsp['response'][episode]['author'])
+                    at = str(data['author'])
                 except:
                     at = ''
                 try: #Ocena
-                    rating = str(jsonrsp['response'][episode]['rating'])
+                    rating = str(data['rating'])
                 except:
                     rating = 'G'
 
-                #print (tsn+' Episode '+en+ide+'@'+pos+'@'+subtitle_completion1+'@'+subtitle_completion2+'@'+et+dur+hd+et+at+rating+ar+pos)
-                addLink(tsn+' Episode '+en,ide+'@'+pos+'@'+subtitle_completion1+'@'+subtitle_completion2+'@'+et,dur,hd,et,at,rating,ar,'play',pos)
-                #addLink(jsonrsp['response'][episode]['container']['titles']['en']+' Episode '+str(jsonrsp['response'][episode]['number']),jsonrsp['response'][episode]['id']+'@'+jsonrsp['response'][episode]['images']['poster']['url']+'@'+subtitle_completion1+'@'+subtitle_completion2,jsonrsp['response'][episode]['duration'],hd,et,at,rating,str(jsonrsp['response'][episode]['container']['review_stats']['average_rating']),4,jsonrsp['response'][episode]['images']['poster']['url'])
+
+                addLink(tsn + ep, video_id +'@'+pos+'@'+subs_local+'@'+subs_en+'@'+et,dur,hd,et,at,rating,ar,'play',pos)
+
         except:
             xbmc.executebuiltin('Notification(%s, %s, %d, %s)'%('VIKI®','Error in PREPARE Function', 4000, md+'DefaultIconError.png'))
     if len(jsonrsp['response'])==0:
         addDir('There are no episodes for now','','','',md+'DefaultFolderBack.png')
     #Koniec indeksowania
 
-    #Jeśli mamy więcej stron...
+    #Next page...
     if jsonrsp['more'] == True:
         getpage=re.compile('(.+?)page=(.+?)&per_page').findall(url)
         for fronturl,page in getpage:
             newpage = int(page)+1
             url = fronturl + 'page=' + str(newpage) + '&per_page=50&app=100000a&t=' + timestamp
             #print 'URL OF THE NEXT PAGE IS' + url
-            addDir('Next page >>',url,'','prepare',md+'DefaultFolder.png')
+            addDir('Next page >>', url, 'prepare', '', md+'DefaultFolder.png')
 
 #Gatunki
 def GENRE(url):
+
     xbmcplugin.setContent(int(sys.argv[1]), 'season')
-    req = urllib.request.Request('https://api.viki.io/v4/videos/genres.json?app=100000a')
-    req.add_header('User-Agent', UA)
-    opener = urllib.request.build_opener()
-    f = opener.open(req)
-    jsonrsp = json.loads(f.read())
+    link = 'https://api.viki.io/v4/videos/genres.json?app=100000a'
+    jsonrsp = requests.get(link + order, headers=header).json()
+
     #print jsonrsp[0]['name']['en']
 
-    #Rozpocznij indeksowanie
     for genre in range(0, len(jsonrsp)):
-        addDir(jsonrsp[genre]['name']['en'],'https://api.viki.io/v4/'+url+'.json?sort=newest_video&page=1&per_page=50&app=100000a&genre='+jsonrsp[genre]['id']+'&t=','','index',md+'DefaultFolder.png')
-    #Край на обхождането
+        addDir(jsonrsp[genre]['name']['en'], 'https://api.viki.io/v4/'+url+'.json?sort=newest_video&page=1&per_page=50&app=100000a&genre='+jsonrsp[genre]['id']+'&t=', 'index', '', md+'DefaultFolder.png')
 
 
 #Kraj
 def COUNTRY(url):
     xbmcplugin.setContent(int(sys.argv[1]), 'season')
-    req = urllib.request.Request('https://api.viki.io/v4/videos/countries.json?app=100000a')
-    req.add_header('User-Agent', UA)
-    opener = urllib.request.build_opener()
-    f = opener.open(req)
-    jsonrsp = json.loads(f.read())
+    link = 'https://api.viki.io/v4/videos/countries.json?app=100000a'
+
+    jsonrsp = requests.get(link + order, headers=header).json()
     #print jsonrsp['ae']['name']['en']
 
-    #Начало на обхождането
     for country, subdict in jsonrsp.items():
-        addDir(jsonrsp[country]['name']['en'],'https://api.viki.io/v4/'+url+'.json?sort=newest_video&page=1&per_page=50&app=100000a&origin_country='+country+'&t=','','index',md+'DefaultFolder.png')
+        addDir(jsonrsp[country]['name']['en'], 'https://api.viki.io/v4/'+url+'.json?sort=newest_video&page=1&per_page=50&app=100000a&origin_country='+country+'&t=', 'index', '',md+'DefaultFolder.png')
 
-#Wyszukiwarka
+def SEARCH():
 
-def SEARCH(url):
+    addDir("[B]New search...[/B]", '', "movieSearchnew", '', md+'DefaultAddonsSearch.png')#"New search..."32603
+    addLink('Play video by ID', 'loadbyid', '0', 'True', '', '', 'G', '5.0', 'loadID', md + 'DefaultStudios.png')
 
-    addDir("New search...", "movieSearchnew", "search.png", "DefaultMovies.png")#"New search..."32603
     from sqlite3 import dbapi2 as database
+
     dbcon = database.connect(searchFile)
     dbcur = dbcon.cursor()
 
@@ -318,12 +342,13 @@ def SEARCH(url):
     for (id, term) in dbcur.fetchall():
         if term not in str(lst):
             delete_option = True
-            addDir(term, "movieSearchterm&name=%s" % term, "search.png", "DefaultMovies.png")
+            addDir(term, "", "movieSearchterm&name=%s" % term, "", md+'DefaultAddonsSearch.png')
             lst += [(term)]
     dbcur.close()
 
     if delete_option:
-        addDir("Click to clear search history", "clearCacheSearch", "tools.png", "DefaultAddonProgram.png") #"Naciśnij aby wyczyścić historię"#32605
+        addDir("[I]Click to clear search history[/I]", '', "clearCacheSearch", '', md+'DefaultAddonsSearch.png') #"Naciśnij aby wyczyścić historię"#32605
+
 
 def search_new(url):
 #	control.idle()
@@ -334,7 +359,7 @@ def search_new(url):
     k.doModal()
     q = k.getText() if k.isConfirmed() else None
     if q == None or q == "":
-        addDir('Go to main menu...','','','',md+'DefaultFolderBack.png')
+        addDir('Go to main menu...', '', '', '', md+'DefaultFolderBack.png')
 #	q = cleantitle.normalize(q)  # for polish characters
 #	control.busy()
 
@@ -346,15 +371,24 @@ def search_new(url):
     dbcon.commit()
     dbcur.close()
 
-    q = quote_plus(name)
+    q = quote_plus(q)
     #print ('SEARCHING:' + q)
     INDEX(url + q)
-
 
 def search_term(url, name):
 
     INDEX(url + quote_plus(name))
 
+def clear_search():
+
+    from sqlite3 import dbapi2 as database
+    dbcon = database.connect(searchFile)
+    dbcur = dbcon.cursor()
+    dbcur.execute("DROP TABLE IF EXISTS %s" % "movies")
+    dbcur.execute("VACUUM")
+    dbcon.commit()
+    dbcur.close()
+    SEARCH()
 
 #Załaduj klip według ID
 def LOADBYID():
@@ -363,42 +397,46 @@ def LOADBYID():
         if (keyb.isConfirmed()):
             vid = quote_plus(keyb.getText())
             #print 'LOADBYID:' + vid
-            PLAY('VIKI®',vid+'@0@50',md+'DefaultStudios.png')
+            PLAY('VIKI®', vid+'@0@50', md+'DefaultStudios.png')
         else:
-            addDir('Go to main menu...','','','',md+'DefaultFolderBack.png')
+            addDir('Go to main menu...', '', '', '', md+'DefaultFolderBack.png')
 
-
-#Podpisywanie wniosków w imieniu Flash Playera
-def SIGN(url,pth):
-
-    timestamp = str(int(time.time()))
-    key = 'd96704b180208dbb2efa30fe44c48bd8690441af9f567ba8fd710a72badc85198f7472'
-    rawtxt = '/v4/videos/'+url+pth+'?app=100005a&t='+timestamp+'&site=www.viki.com'
-    hashed = hmac.new(key.encode('utf-8'), rawtxt.encode('utf-8'), sha1)
-    signatura = binascii.hexlify(hashed.digest())
-    fullurl = 'https://api.viki.io' + rawtxt+'&sig='+signatura.decode('utf-8')
-    #print ('fullurl:'+fullurl)
-    return fullurl
-
-#Prześlij filmy i napisy
 def PLAY(name,url,iconimage):
 
-        url, thumbnail, subtitle_completion1, subtitle_completion2, plot = url.split("@")
-        #url, thumbnail, subtitle_completion1, subtitle_completion2 = url.split("@")
+
+        video_id, thumbnail, subtitle_completion1, subtitle_completion2, plot = url.split("@")
 
         #Prośba o napisy
+        dialog = xbmcgui.Dialog()
         try:
             if (int(subtitle_completion1)>79 and se=='true'): #Jeśli przetłumaczone ponad 79% napisów w naszym języku
-                srtsubs_path = xbmcvfs.translatePath('special://temp/vikir.'+language+'.srt')
-                xbmc.executebuiltin('Notification(%s, %s, %d, %s)'%('VIKI®',language+' subtitles at '+subtitle_completion1+'%', 4000, md+'DefaultAddonSubtitles.png'))
+                srtsubs_path = xbmcvfs.translatePath('special://temp/vikirakuten.'+language+'.srt')
+
+                #xbmc.executebuiltin('Notification(%s, %s, %d, %s)'%('VIKI®',language+' subtitles at '+subtitle_completion1+'%', 4000, md+'DefaultAddonSubtitles.png'))
+
                 urllib.request.urlcleanup()
-                urllib.request.urlretrieve(SIGN(url,'/subtitles/'+lang+'.srt'), srtsubs_path)
+                urllib.request.urlretrieve(
+                    VikiAPI._sign(f'videos/{video_id}/subtitles/{lang}.srt'), srtsubs_path)
+
+                #subs = requests.get(SIGN(url,'/subtitles/'+lang+'.srt')).text
+                #f = open(srtsubs_path, 'w')
+                #f.write(subs)
+                #f.close()
                 sub = 'true'
             elif (int(subtitle_completion2)>0 and se=='true'): #Przełączamy się na napisy w języku angielskim
                 srtsubs_path = common.srtsubs_path
-                xbmc.executebuiltin('Notification(%s, %s, %d, %s)'%('VIKI®','English subtitles at '+subtitle_completion2+'%', 4000, md+'DefaultAddonSubtitles.png'))
+
+                dialog.notification('VIKI®', 'English subtitles at ' + subtitle_completion2 + '%', md + 'DefaultAddonSubtitles.png', 4000, sound=False)
+                #xbmc.executebuiltin('Notification(%s, %s, %d, %s, %s)'%('VIKI®','English subtitles at '+subtitle_completion2+'%', 4000, md+'DefaultAddonSubtitles.png', 'sound=False'))
                 urllib.request.urlcleanup()
-                urllib.request.urlretrieve(SIGN(url,'/subtitles/en.srt'), srtsubs_path)
+
+                urllib.request.urlretrieve(
+                    VikiAPI._sign(f'videos/{video_id}/subtitles/en.srt'), srtsubs_path)
+                #subs = requests.get(SIGN(url, '/subtitles/en.srt')).text
+                #f = open(str(srtsubs_path), 'w')
+                #f.write(subs)
+                #f.close()
+
                 sub = 'true'
             else:
                 sub = 'false' #Jeśli nie są dostępne napisy
@@ -435,19 +473,29 @@ def PLAY(name,url,iconimage):
                 'Accept-Encoding': 'gzip'
                                     }
 
+                web = 'https://www.viki.com/videos/' + url + '-viki-link'
                 #Podpisanie wniosku
                 #print (SIGN(url,'/streams.json'))
                 #response = requests.get(SIGN(url,'/streams.json'), headers=viki_headers)
                 #jsonrsp = response.json()
-                jsonrsp = ''
+                #jsonrsp = ''
                 #print (SIGN(url,'/streams.json'))
                 #print (jsonrsp['mpd']['http']['url'])
                 #print (jsonrsp)
 
                 #print (url)
-                web = 'https://www.viki.com/videos/'+url+'-viki-link'
+
                 vid = YDStreamExtractor.getVideoInfo(web,quality=2) #quality is 0=SD, 1=720p, 2=1080p and is a maximum
-                stream = vid.streamURL() #This is what Kodi (XBMC) will play
+                test = vid._streams[0]['ytdl_format']['requested_formats'][0]
+                #test2 = vid.ID
+                stream1 = test['manifest_url']
+                stream = vid.streamURL()
+                manifest = requests.get(test['manifest_url']).text
+                #print('dupa')
+#                test2 = test.json()
+
+
+#                stream = vid.streamURL() #This is what Kodi (XBMC) will play
 
             #Jakość wybrana przez użytkownika
                     #if 'mpd' in jsonrsp:
@@ -505,30 +553,34 @@ def PLAY(name,url,iconimage):
         #Ładowanie wideo
         try:
             #print stream
-            if 'mpd' not in stream:
+            if 'manifest_url' not in test:
                 stream = stream+'|verifypeer=false&User-Agent='+ quote_plus(MUA)+'&Referer=https://www.viki.com'
-                li = xbmcgui.ListItem(path=stream)
-                li.setArt({ 'thumb': thumbnail,'poster': thumbnail, 'banner' : thumbnail, 'fanart': thumbnail, 'icon': thumbnail })
-                li.setInfo( type="Video", infoLabels={ 'Title': name, 'Plot': plot } )
+                li = xbmcgui.ListItem(path=stream1)
+                li.setArt({'thumb': thumbnail,'poster': thumbnail, 'banner': thumbnail, 'fanart': thumbnail, 'icon': thumbnail})
+                li.setInfo(type="Video", infoLabels={ 'Title': name, 'Plot': plot})
 
 
-            if 'mpd' in stream:
+            if 'manifest_url' in test:
+
                 is_helper = inputstreamhelper.Helper('mpd', drm='com.widevine.alpha')
                 if is_helper.check_inputstream():
-                    if jsonrsp: #Ако API връща резултат/манифест
+                    if manifest: #Jeśli API zwróci wynik/manifest
                         #li = xbmcgui.ListItem(path=jsonrsp['mpd']['http']['url'])
-                        li = xbmcgui.ListItem(path=stream)
-                        li.setArt({ 'thumb': thumbnail,'poster': thumbnail, 'banner' : thumbnail, 'fanart': thumbnail, 'icon': thumbnail })
-                        li.setInfo( type="Video", infoLabels={ 'Title': name, 'Plot': plot } )
+                        li = xbmcgui.ListItem(path=stream1)
+                        li.setArt({'thumb': thumbnail, 'poster': thumbnail, 'banner' : thumbnail, 'fanart': thumbnail, 'icon': thumbnail })
+                        li.setInfo(type="Video", infoLabels={ 'Title': name, 'Plot': plot } )
 
                         li.setMimeType('application/xml+dash')
                         li.setContentLookup(False)
 
                         li.setProperty('inputstream', 'inputstream.adaptive')
                         li.setProperty('inputstream.adaptive.manifest_type', 'mpd')
-                        li.setProperty('inputstream.adaptive.license_type', 'com.widevine.alpha')
-                        li.setProperty('inputstream.adaptive.license_key', 'https://manifest-viki.viki.io/v1/license?dt=dt3&video_id='+url+'&app=100000a&app_ver=4.0.80|User-Agent='+ quote_plus(UA)+'&Origin=https://www.viki.com&Referer=https://www.viki.com|R{SSM}|')
-                        li.setProperty('inputstream.adaptive.stream_headers', 'User-Agent='+ quote_plus(UA)+'&Origin=https://www.viki.com&Referer=https://www.viki.com&verifypeer=false')
+
+                        #li.setProperty('inputstream.adaptive.license_type', 'com.widevine.alpha')
+
+                        #li.setProperty('inputstream.adaptive.license_key', manifest + '||R{SSM}|')
+                        #li.setProperty('inputstream.adaptive.license_key', 'https://manifest-viki.viki.io/v1/license?dt=dt3&video_id='+test2+'&app=100000a&app_ver=4.0.80|User-Agent='+ quote_plus(UA)+'&Origin=https://www.viki.com&Referer=https://www.viki.com|R{SSM}|')
+                        #li.setProperty('inputstream.adaptive.stream_headers', 'User-Agent='+ quote_plus(UA)+'&Origin=https://www.viki.com&Referer=https://www.viki.com&verifypeer=false')
 
                     else:
                         xbmc.executebuiltin('Notification(%s, %s, %d, %s)'%('VIKI®','API does not return a result', 4000, md+'OverlayLocked.png'))
@@ -549,83 +601,119 @@ def PLAY(name,url,iconimage):
             xbmcgui.Dialog().ok('VIKI® Error',str(e.code)+" "+str(e.reason)+"\n"+"That's all we know about this error.")
 
 #Moduł do dodawania osobnego tytułu i jego atrybutów do zawartości katalogu wyświetlanego w Kodi - TUTAJ NIE TRZEBA ZMIENIAĆ
-def addLink(name,url,vd,hd,plot,author,rating,ar,action,iconimage):
+def addLink(name,url,vd,hd,plot,author,rating,ar,action,iconimage,meta={}):
+
+    trans = ''
+    try:
+        trans = language + ' ' + url.split('@')[2] + '%'
+    except:
+        pass
 #	try:
 #		name = control.lang(name).encode("utf-8")
 #	except:
-    u=sys.argv[0]+"?url="+ quote_plus(url)+"&action="+str(action)+"&name="+ quote_plus(name)
-    ok=True
-    liz=xbmcgui.ListItem(name)
-    liz.setArt({ 'thumb': iconimage,'poster': iconimage, 'banner' : iconimage, 'fanart': iconimage, 'icon': iconimage })
-    liz.setInfo( type="Video", infoLabels={ "Title": name, "Rating": ar } )
-    liz.setInfo( type="Video", infoLabels={ "Duration": vd, "Plot": plot } )
-    #liz.setInfo( type="Video", infoLabels={ "PlotOutline": "Това е plotoutline", "Tagline": "Това е tagline" } )
-    liz.setInfo( type="Video", infoLabels={ "Studio": author, "Mpaa": rating } )
-    if hd=='True':
-        liz.addStreamInfo('video', { 'width': 1280, 'height': 720 })
-        liz.addStreamInfo('video', { 'aspect': 1.78, 'codec': 'h264' })
+    u = sys.argv[0]+"?url="+ quote_plus(url)+"&action="+str(action)+"&name="+ quote_plus(name)
+    liz = xbmcgui.ListItem(name)
+    liz.setArt({'thumb': iconimage, 'poster': iconimage, 'banner': iconimage, 'fanart': iconimage, 'icon': iconimage})
+    info = {
+        "Title": name,
+        "Rating": ar,
+        "Duration": vd,
+        "Plot": plot,
+        "code": trans,
+        "Studio": author,
+        "Mpaa": rating
+    }
+    liz.setInfo(type="Video", infoLabels=info)
+
+    if hd == 'True':
+        liz.addStreamInfo('video', {'width': 1280,
+                                    'height': 720,
+                                    'aspect': 1.78,
+                                    'codec': 'h264'
+                                    }
+        )
+
     else:
-        liz.addStreamInfo('video', { 'width': 720, 'height': 480 })
-        liz.addStreamInfo('video', { 'aspect': 1.5, 'codec': 'h264' })
+        liz.addStreamInfo('video', {'width': 720,
+                                    'height': 480,
+                                    'aspect': 1.5,
+                                    'codec': 'h264'
+                                    }
+                          )
+
     liz.addStreamInfo('audio', { 'codec': 'aac', 'channels': 2 })
     liz.setProperty("IsPlayable" , "true")
 
     contextmenu = []
     contextmenu.append(('Information', 'XBMC.Action(Info)'))
     liz.addContextMenuItems(contextmenu)
-    ok=xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]),url=u,listitem=liz,isFolder=False)
-    return ok
+    xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]),url=u,listitem=liz,isFolder=False)
+    xbmcplugin.addSortMethod(int(sys.argv[1]), sortMethod=xbmcplugin.SORT_METHOD_UNSORTED,
+                             label2Mask='%P '+' %D')
+
+
 #    Moduł dodawania osobnego katalogu i jego atrybutów do zawartości katalogu wyświetlanego w Kodi - TUTAJ NIE TRZEBA ZMIENIAĆ
-def addDir(name,url,plot,mode,iconimage):
-#	try:
-#		name = control.lang(name).encode("utf-8")
-#	except:
+def addDir(name, url,  action, plot, iconimage, code='', meta={}):
+
+    if code:
+        code = language + ' ' + code + '%'
 
     u = sys.argv[0]+"?url=" + quote_plus(url) + "&action="+str(action)+ "&name=" + quote_plus(name)
-    ok=True
+
     liz=xbmcgui.ListItem(name)
+
     liz.setArt({'thumb': iconimage, 'poster': iconimage, 'banner': iconimage, 'fanart': iconimage, 'icon':'DefaultFolder.png'})
-    liz.setInfo(type="Video", infoLabels={"Title": name, "Plot": plot})
+    info = {
+        "Title": name,
+        "Plot": plot,
+        "code": code
+    }
+
+    liz.setInfo(type="Video", infoLabels=info)
 
     if len(plot)>0:
         contextmenu = []
         contextmenu.append(('Information', 'XBMC.Action(Info)'))
         liz.addContextMenuItems(contextmenu)
 
-    ok=xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]),url=u,listitem=liz,isFolder=True)
-    return ok
+    xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]),url=u,listitem=liz,isFolder=True)
+    xbmcplugin.addSortMethod(int(sys.argv[1]), sortMethod=xbmcplugin.SORT_METHOD_UNSORTED,
+                             label2Mask='%P ')
+
 
 
 #TUTAJ NIE TRZEBA NIC ZMIENIAĆ
-params = dict(parse_qsl(sys.argv[2].replace("?", "")))
+
+
 
 name = params.get("name")
 url = params.get("url")
 iconimage = params.get("iconimage")
+meta = params.get("meta")
 action = params.get("action")
 
 #Lista poszczególnych podprogramów/modułów w tej wtyczce - musi być w pełni zgodna z powyższym kodem
-if action==None or url==None or len(url)<1:
+if action == None:
     CATEGORIES()
-elif action=='index':
+elif action == 'index':
     INDEX(url)
-elif action=='prepare':
+elif action == 'prepare':
     PREPARE(url)
-elif action=='search':
-    SEARCH(url)
+elif action == 'search':
+    SEARCH()
 elif action == 'movieSearchnew':
     search_new(SEARCH_URL)
 elif action == "movieSearchterm":
-    search_term(name)
-elif action=='play':
+    search_term(SEARCH_URL, name)
+elif action == 'clearCacheSearch':
+    clear_search()
+elif action == 'play':
     PLAY(name,url,iconimage)
-elif action==5:
-    SIGN(url,pth)
-elif action=='genre':
+elif action == 'genre':
     GENRE(url)
-elif action=='country':
+elif action == 'country':
     COUNTRY(url)
-elif action=='loadID':
+elif action == 'loadID':
     LOADBYID()
 
 

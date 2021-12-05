@@ -70,7 +70,7 @@ Changelog:
     <reuselanguageinvoker>true</reuselanguageinvoker>
 </addon>
 
-<addon id="plugin.video.vikirakuten" name="VIKI Rakuten®" version="0.0.0.2" provider-name="Lantash">
+<addon id="plugin.video.vikirakuten" name="VIKI Rakuten®" version="0.0.0.4" provider-name="Lantash">
   <requires>
 	<import addon="xbmc.python" version="3.0.0"/>
 	<import addon="inputstream.adaptive" version="2.1.0"/>
@@ -95,7 +95,14 @@ Changelog:
   	<forum>https://kodibg.org/forum/thread-209.html</forum>
   	<website>https://www.viki.com</website>
   	<news>
-		Pierwsza wersja
+		Changelog
+		0.0.0.4
+		wyszukiwanie i lista wyszukiwania
+		czyszczenie listy
+		0.0.0.3
+		Audio fix
+		hash fix
+		lista jezyków napisów
 	</news>
 	<assets>
 	   <icon>resources/icon.png</icon>
