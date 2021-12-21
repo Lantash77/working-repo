@@ -3,18 +3,23 @@ import sys
 import re
 import urllib.request, urllib.parse, urllib.error
 from urllib.parse import parse_qs, quote_plus
+
 import xbmc
 import xbmcgui
 import xbmcplugin
+import xbmcaddon
 
+my_addon = xbmcaddon.Addon()
+Getsetting = my_addon.getSetting
 
 def addDir(name, url, mode='', icon='', thumb='', fanart='', poster='', banner='', clearart='', clearlogo='',
-           genre='', year='', rating='', dateadded='', plot='',
+           genre='', year='', rating='', dateadded='', plot='', subdir='',
            section='', page='', code='', studio='', meta='',
            isFolder=True, total=1):
     u = (sys.argv[0] + '?url=' + quote_plus(url) + '&mode=' + str(mode) + '&name='
          + quote_plus(name) + '&img=' + quote_plus(thumb)
-         + '&section=' + quote_plus(section) + '&page=' + quote_plus(page))
+         + '&section=' + quote_plus(section) + '&page=' + quote_plus(page)
+         + '&subdir=' + quote_plus(subdir))
     liz = xbmcgui.ListItem(name)
     contextmenu = []
     contextmenu.append(('Informacja', 'Action(Info)'), )    
@@ -44,13 +49,14 @@ def addDir(name, url, mode='', icon='', thumb='', fanart='', poster='', banner='
 
 
 def addLink(name, url, mode='', icon='', thumb='', fanart='', poster='',
-            banner='', clearart='', clearlogo='', genre='', year='',
-            rating='', dateadded='', plot='', code='', studio='',meta='',
+            banner='', clearart='', clearlogo='', genre='', year='', subdir='',
+            rating='', dateadded='', plot='', code='', studio='', meta='',
             isFolder=False, total=1,
             type='video', section='', page=''):
     u = (sys.argv[0] + '?url=' + quote_plus(url) + '&mode=' + str(mode)
          + '&name=' + quote_plus(name) + '&img=' + quote_plus(thumb)
-         + '&section=' + quote_plus(section) + '&page=' + quote_plus(page))
+         + '&section=' + quote_plus(section) + '&page=' + quote_plus(page)
+         + '&subdir=' + quote_plus(subdir))
     liz = xbmcgui.ListItem(name)
     contextmenu = []
     contextmenu.append(('Informacja', 'Action(Info)'), )
@@ -87,8 +93,7 @@ def get_params():
         paramstring = paramstring[1:]
     return dict((k, vv[0]) for k, vv in parse_qs(paramstring).items())
 
-def PlayFromHost(url, mode, title):
-
+def PlayFromHost(url, mode, title, subdir=''):
 
     if 'google' in url:
         url = url.replace('preview', 'view')
@@ -98,17 +103,26 @@ def PlayFromHost(url, mode, title):
 
             pattern = r'https://(.+?)url='
             videolink = re.sub(pattern, '', url)
-            
-            li = xbmcgui.ListItem(title, path=str(videolink))
-            xbmcplugin.setResolvedUrl(handle=int(sys.argv[1]), succeeded=True, listitem=li)
+            if mode == 'play':
+                li = xbmcgui.ListItem(title, path=str(videolink))
+                xbmcplugin.setResolvedUrl(handle=int(sys.argv[1]), succeeded=True, listitem=li)
+            elif mode == 'download':
+                from resources.libs import downloader
+                dest = Getsetting("download.path")
+                downloader.download(title, 'image', videolink, dest, subdir)
 #Send to resolver           
         else:
             import resolveurl
             try:
                 stream_url = resolveurl.resolve(url)
                 xbmc.log('DramaQueen.pl | wynik z resolve  : %s' % stream_url, xbmc.LOGINFO)
-                li = xbmcgui.ListItem(title, path=str(stream_url))
-                xbmcplugin.setResolvedUrl(handle=int(sys.argv[1]), succeeded=True, listitem=li)
+                if mode == 'play':
+                    li = xbmcgui.ListItem(title, path=str(stream_url))
+                    xbmcplugin.setResolvedUrl(handle=int(sys.argv[1]), succeeded=True, listitem=li)
+                elif mode == 'download':
+                    from resources.libs import downloader
+                    dest = Getsetting("download.path")
+                    downloader.download(title, 'image', stream_url, dest, subdir)
             except:
                 exit()
                 
@@ -118,7 +132,7 @@ def PlayFromHost(url, mode, title):
                        '[COLOR red]Problem  -  Nie można wyciągnąć linku[/COLOR]', 
                        xbmcgui.NOTIFICATION_INFO, 5000)
                                      
-def SourceSelect(players, links, title):
+def SourceSelect(players, links, title, subdir=''):
     
     if len(players) > 0:
         d = xbmcgui.Dialog()
@@ -126,7 +140,15 @@ def SourceSelect(players, links, title):
         if select > -1:
             link = str(links[select])
             xbmc.log('DramaQueen.pl | Proba z : %s' % players[select] + '   ' + link + '  ', xbmc.LOGINFO)
-            PlayFromHost(link, mode='play', title=title)
+            if Getsetting('download.opt') == 'true':
+                ret = d.yesno('Pobieranie', 'Wybierz Opcję', 'Oglądaj', 'Pobierz')
+                if ret:
+                    mode = 'download'
+                else:
+                    mode = 'play'
+            else:
+                mode = 'play'
+            PlayFromHost(link, mode='play', title=title, subdir=subdir)
 
         else:
             exit()

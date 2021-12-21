@@ -15,7 +15,6 @@ import xbmcaddon
 import xbmcvfs
 from urllib.parse import quote_plus
 from resources.libs.CommonFunctions import parseDOM
-#from CommonFunctions import parseDOM
 from resources.libs import cache
 from resources.libs import addon_tools as addon
 from resources.libs import dqscraper
@@ -32,6 +31,7 @@ base_link = "https://dramaqueen.pl/"
 setting = xbmcaddon.Addon().getSetting
 search_url = 'https://www.dramaqueen.pl/?s=%s'
 sess = requests.session()
+
 headersget = {
     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/71.0.3578.75 Safari/537.36',
 #    'authority': 'www.dramaqueen.pl',
@@ -60,6 +60,7 @@ japan_thumb = MEDIA + 'japoniathumb.png'
 inne_thumb = MEDIA + 'innethumb.png'
 default_background = MEDIA + 'search.jpg'
 search_icon = MEDIA + 'search.png'
+iconsettings = MEDIA + 'settings.png'
 
 ############################################################################################################
 ############################################################################################################
@@ -91,6 +92,10 @@ def CATEGORIES(login):
                  mode=1, fanart=china_background, thumb=inne_thumb)
     addon.addDir("Wyszukiwanie", 'https://www.dramaqueen.pl/?s=',
                  mode=6, fanart=default_background, thumb=search_icon)
+###Ustawienia###
+    addon.addDir('Ustawienia', '', mode=12,
+                 fanart=default_background, thumb=iconsettings, isFolder=True)
+
     if login == True:
        Logowanie(True)
 ############################################################################################################
@@ -168,12 +173,8 @@ def Kategorie():
 
     ht2 = ht1.links['alternate']['url']
     ht3 = json.loads(requests.get(ht2, headers=headersget, timeout=10).text)['content']['rendered']
-
-
-
 #    rG = requests.get(url, headers=headersget, timeout=15).text
 
-#    LoginCheck(url=rG)
     result = parseDOM(ht3, 'div', attrs={'class': 'tagcloud'})[0]
     links = parseDOM(result, 'a', ret='href')
     label = parseDOM(result, 'a')
@@ -195,7 +196,6 @@ def KategorieLista():
 
     url = params['url']
 
-
     rG = requests.get(url, headers=headersget, timeout=15).text
     rG = CleanHTML(rG)
 
@@ -206,12 +206,14 @@ def KategorieLista():
 
     for item in zip(label, links, obraz):
        if str(item[1]).__contains__('/drama/'):
-           addon.addDir(str(item[0]), str(item[1]), 
-           mode=2, fanart=str(item[2]), thumb=str(item[2]), code='[B][COLOR %s]Drama[/COLOR][/B]' % 'green')
+           addon.addDir(str(item[0]), str(item[1]), subdir=label,
+                        mode=2, fanart=str(item[2]), thumb=str(item[2]),
+                        code='[B][COLOR %s]Drama[/COLOR][/B]' % 'green')
            
        elif str(item[1]).__contains__('/film/'):
-           addon.addLink(str(item[0]), str(item[1]), 
-           mode=3, fanart=str(item[2]), thumb=str(item[2]), code='[B][COLOR %s]Film[/COLOR][/B]' % 'green')
+           addon.addLink(str(item[0]), str(item[1]), subdir=label,
+                         mode=3, fanart=str(item[2]), thumb=str(item[2]),
+                         code='[B][COLOR %s]Film[/COLOR][/B]' % 'green')
            
     xbmcplugin.addSortMethod(int(sys.argv[1]), sortMethod=xbmcplugin.SORT_METHOD_TITLE, 
                              label2Mask= '%P')
@@ -225,9 +227,9 @@ def ListTitles():
     url = params['url']
 
     ht1 = sess.get(url, headers=headersget, timeout=10)
-
     ht2 = ht1.links['alternate']['url']
     ht3 = json.loads(requests.get(ht2, headers=headersget, timeout=10).text)['content']['rendered']
+    ht3 = CleanHTML(ht3)
 
     result = parseDOM(ht3, 'div', attrs={'id': 'av_section_1'})[0]
     res = parseDOM(result, 'div', attrs={'class': 'flex_column ' + r'.+?'})
@@ -283,12 +285,12 @@ def ListTitles():
 
         if str(item[0]).__contains__('/drama/'):
             addon.addDir(str(title), str(item[0]), mode=2, plot=(str(plot)),
-                         fanart=(str(fanart)), isFolder=True, thumb=(str(poster)),
+                         fanart=(str(fanart)), isFolder=True, thumb=(str(poster)), subdir=title,
                          banner=(str(banner)), genre=str(genre), year=str(year), section='', meta=meta)
         elif str(item[0]).__contains__('/film/'):
             addon.addLink(str(title), str(item[0]), mode=3, plot=str(plot),
                           fanart=str(fanart), thumb=str(poster),
-                          banner=str(banner), meta=meta)
+                          banner=str(banner), subdir=title, meta=meta)
 
     # if thread:
     #    t = threading.Thread(target=scrape_info2, args=(threads,))
@@ -305,12 +307,14 @@ def ListEpisodes():
     
     name = params['name']
     thumb = params['img']
+    subdir = params['subdir']
     url = params['url']
     rE = str(requests.get(url, headers=headersget, timeout=15).text)
+    rE = CleanHTML(rE)
 #    LoginCheck(rE)
     
-    rE = str.replace(rE, '&#8211;', '-')
-    rE = rE.replace('&nbsp;', ' ')
+#    rE = str.replace(rE, '&#8211;', '-')
+#    rE = rE.replace('&nbsp;', ' ')
     result = parseDOM(rE, 'div', attrs={'class': 'togglecontainer '+ r'.+?'})[0]
     results = re.findall('av_toggle_section(.+?)<span', result)
     episodes = [item for item in parseDOM(results, 'p')]
@@ -324,7 +328,7 @@ def ListEpisodes():
     fanart = ''#re.findall('background-image: url\((.+?)\);', rE)[1]
     
     inprogress = '[COLOR=red][I]  w tłumaczeniu[/COLOR][/I]'
-    incorrection =  '[COLOR=red][I]  korekta[/COLOR][/I]'
+    incorrection = '[COLOR=red][I]  korekta[/COLOR][/I]'
 
     for item in episodes:
         if item.__contains__('tłumaczenie'):
@@ -335,7 +339,7 @@ def ListEpisodes():
                           plot=(str(plot)), thumb=str(thumb))
         else:
             addon.addLink(str(item), url, mode=3, fanart=(str(fanart)), 
-                          plot=(str(plot)), thumb=str(thumb))
+                          plot=(str(plot)), thumb=str(thumb), subdir=subdir)
     
 
 def WyswietlanieLinkow():
@@ -345,7 +349,7 @@ def WyswietlanieLinkow():
     
     url = params['url']
     name = params['name']
-    
+    subdir = params['subdir']
     html = requests.get(url, headers=headersget, timeout=15).text
     LoginCheck(html)
     results = [item for item in parseDOM(html, 'section', attrs={'class': 'av_toggle_section ' +r'.+?'})]
@@ -364,7 +368,7 @@ def WyswietlanieLinkow():
         avlinks = [parseDOM(item, 'a', ret='href') for item in results][0]
         avplayers = [parseDOM(item, 'button') for item in results][0]        
          
-    addon.SourceSelect(players=avplayers, links=avlinks, title=name)
+    addon.SourceSelect(players=avplayers, links=avlinks, title=name, subdir=subdir)
     
 def Szukaj_Nowy():
 
@@ -430,12 +434,12 @@ def WynikiSzukania(url):
 #            if title == '': title = Title
             
             if '/drama/' in item:
-                addon.addDir(str(title), str(link), mode=2, 
+                addon.addDir(str(title), str(link), mode=2, subdir=title,
                             fanart=str(fanart), thumb=str(poster), poster=str(poster),
                             plot=str(plot), code='[B][COLOR=green]drama[/COLOR][/B]',
                             genre=str(genre), year=str(year))
             else:
-                addon.addLink(str(title), str(link), mode=3, 
+                addon.addLink(str(title), str(link), mode=3, subdir=title,
                          fanart=str(fanart), thumb=str(poster), poster=str(poster),
                          plot=str(plot), code='[B][COLOR=green]film[/COLOR][/B]',
                          genre=str(genre), year=str(year))                       
@@ -490,6 +494,22 @@ def clear_search():
     dbcon.commit()
     dbcur.close()
     Szukaj()
+
+
+def PathCheck():
+    if setting('download.path') == '':
+        dialog = xbmcgui.Dialog()
+        ret = dialog.yesno('Błąd Ustawień Pobierania',
+                           'Włączono pobieranie, ale nie ustawiono ścieżki pobierania \nWprowadź scieżkę pobierania w ustawieniach' ,
+                           'Wyjdź', 'Ustawienia')
+        if ret:
+            my_addon.openSettings()
+            xbmc.executebuiltin('Container.Refresh')
+        else:
+            exit()
+    else:
+        return
+
 
 
 def ScrapInfo(threads):
@@ -562,6 +582,8 @@ except:
 #                                                   MODES                                                  #
 ############################################################################################################
 
+if setting('download.opt') == 'true':
+    PathCheck()
 if mode == None:
     CATEGORIES(True)
     xbmcplugin.setContent(int(sys.argv[1]), 'movies')
@@ -620,6 +642,9 @@ elif mode == 11:
      Szukaj_Nowy()
      xbmcplugin.setContent(int(sys.argv[1]), 'movies')
      xbmcplugin.endOfDirectory(int(sys.argv[1]))
+elif mode == 12:
+    my_addon.openSettings()
+    xbmc.executebuiltin('XBMC.Container.Refresh()')
 
 ############################################################################################################
 
