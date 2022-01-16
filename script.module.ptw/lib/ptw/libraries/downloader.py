@@ -27,6 +27,7 @@ import pyxbmct
 import requests
 import xbmc
 import xbmcgui
+import xbmcvfs
 from ptw.libraries import control, cleantitle
 
 
@@ -43,7 +44,9 @@ def download(name, image, url):
     url = url.split("|")[0]
 
     content = re.compile("(.+?)\sS(\d*)E\d*$").findall(name)
-    transname = re.sub(r"/|:|\*|\?|\"|<|>|\+|,|\.|", "", cleantitle.normalize(name))
+    transname = name.translate(str.maketrans('', '', '\/:*?"<>+|.'))
+    transname = cleantitle.normalize(transname)
+#    transname = re.sub(r"/|:|\*|\?|\"|<|>|\+|,|\.|", "", cleantitle.normalize(name))
     levels = ["../../../..", "../../..", "../..", ".."]
 
     if len(content) == 0:
@@ -66,11 +69,13 @@ def download(name, image, url):
             except:
                 pass
         control.makeFile(dest)
-        transtvshowtitle = re.sub(
-            r"/|:|\*|\?|\"|<|>|",
-            "",
-            cleantitle.normalize(content[0][0].encode().decode("utf-8")),
-        )
+        transtvshowtitle = content[0][0].translate(str.maketrans('', '', '\/:*?"<>|.'))
+        transtvshowtitle = cleantitle.normalize(transtvshowtitle)
+#        transtvshowtitle = re.sub(
+#            r"/|:|\*|\?|\"|<|>|",
+#            "",
+#            cleantitle.normalize(content[0][0].encode().decode("utf-8")),
+#        )
         dest = os.path.join(dest, transtvshowtitle)
         control.makeFile(dest)
         dest = os.path.join(dest, "Season %01d" % int(content[0][1]))
@@ -105,12 +110,12 @@ def done(title, dest, downloaded):
     if downloaded:
         text += "%s : %s" % (
             dest.rsplit(os.sep)[-1],
-            "[COLOR forestgreen]Download succeeded[/COLOR]",
+            "[COLOR forestgreen]Pobieranie zakończone[/COLOR]",
         )
     else:
         text += "%s : %s" % (
             dest.rsplit(os.sep)[-1],
-            "[COLOR red]Download failed[/COLOR]",
+            "[COLOR red]Bład Pobierania[/COLOR]",
         )
 
     xbmcgui.Window(10000).setProperty("GEN-DOWNLOADED", text)
@@ -131,7 +136,7 @@ def doDownload(url, dest, title, image, headers):
 
         if not resp:
             xbmcgui.Dialog().ok(
-                title, dest + "\nDownload failed" + "\nNo response from server"
+                title, dest + "\nBłąd Pobierania" + "\nBrak odpowiedzi z serwera"
             )
             return
 
@@ -152,7 +157,7 @@ def doDownload(url, dest, title, image, headers):
 
         if content < 1:
             xbmcgui.Dialog().ok(
-                title, file + "\n" + "Unknown filesize" + "\n" + "Unable to download"
+                title, file + "\n" + "Nieznany Rozmiar Pliku" + "\n" + "Pobieranie Niemożliwe"
             )
             return
 
@@ -172,13 +177,13 @@ def doDownload(url, dest, title, image, headers):
 
         if (
             not xbmcgui.Dialog().yesno(
-                title + " - Confirm Download",
+                title + " - Potwierdź Pobieranie",
                 file
                 + "\n"
-                + "Complete file is %dMB" % mb
-                + "\nContinue with download?",
-                yeslabel="Confirm",
-                nolabel="Cancel",
+                + "Wielkość pliku %dMB" % mb
+                + "\nKontynuować Pobieranie?",
+                yeslabel="Potwierdź",
+                nolabel="Anuluj",
             )
             == 1
         ):
@@ -186,10 +191,10 @@ def doDownload(url, dest, title, image, headers):
 
         print("Download File Size : %dMB %s " % (mb, dest))
 
-        f = open(dest, mode="wb")
+        f = xbmcvfs.File(dest, 'w')
 
         chunks = []
-        control.idle()
+#        control.idle()
         insertIntoDb(title, "0%", "%dMB" % mb, "0")
         for chunk in resp.iter_content(chunk_size=1024):
             downloaded = total
@@ -205,15 +210,12 @@ def doDownload(url, dest, title, image, headers):
                 )
                 manager += 0.1
             if percent >= notify:
-                xbmc.executebuiltin(
-                    "XBMC.Notification(%s,%s,%i,%s)"
-                    % (
-                        title + " - Download Progress - " + str(int(percent)) + "%",
+                xbmcgui.Dialog().notification(
+                        title + " - Postęp Pobierania - " + str(int(percent)) + "%",
                         dest,
-                        10000,
                         image,
+                        10000
                     )
-                )
 
                 print(
                     "Download percent : %s %s %dMB downloaded : %sMB File Size : %sMB"

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-    Covenant Add-on
+    FanFilm Add-on
     Copyright (C) 2018 :)
 
     This program is free software: you can redistribute it and/or modify

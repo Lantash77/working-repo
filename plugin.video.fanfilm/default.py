@@ -41,6 +41,7 @@ def busy_dialog():
             "tvshows",
             "updateLibrary",
             "service",
+            "download",
         ):
             xbmc.executebuiltin("ActivateWindow(busydialognocancel)")
         yield
@@ -52,6 +53,7 @@ def busy_dialog():
             "tvshows",
             "updateLibrary",
             "service",
+            "download",
         ):
             xbmc.executebuiltin("Dialog.Close(busydialognocancel)")
 

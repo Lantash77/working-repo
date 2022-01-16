@@ -1156,79 +1156,14 @@ class sources:
                 time.sleep(0.5)
             except Exception as e:
                 pass
+        try:
+            progressDialog.close()
+        except:
+            pass
 
-        if control.addonInfo("id") == "plugin.video.bennu":
-            try:
-                if progressDialog:
-                    progressDialog.update(
-                        100,
-                        control.lang(30726).encode("utf-8")
-                        + "\n"
-                        + control.lang(30731).encode("utf-8"),
-                    )
+        self.sourcesFilter()
 
-                items = self.sourcesFilter()
-
-                if quality == "RD":
-                    items = [i for i in items if i["debrid"] != ""]
-                elif quality == "SD":
-                    items = [
-                        i for i in items if i["quality"] == "SD" and i["debrid"] == ""
-                    ]
-                elif quality == "HD":
-                    items = [i for i in items if i["quality"] != "SD"]
-
-                if control.setting("bennu.dev.log") == "true":
-                    print("Sources Returned: %s" % str(items), log_utils.LOGINFO)
-
-                try:
-                    progressDialog.close()
-                except:
-                    pass
-
-                if quality == "AUTO":
-                    u = self.sourcesDirect(items)
-                    return u
-                else:
-                    meta = '{"title": "%s", "year": "%s", "imdb": "%s"}' % (
-                        title,
-                        year,
-                        imdb,
-                    )
-                    """control.window.clearProperty("plugin.video.bennu.container.items")
-                    control.window.setProperty("plugin.video.bennu.container.items", json.dumps(items))
-                    
-                    control.window.clearProperty("plugin.video.bennu.container.meta")
-                    control.window.setProperty("plugin.video.bennu.container.meta", meta)"""
-                    control.window.clearProperty(self.itemProperty)
-                    control.window.setProperty(self.itemProperty, json.dumps(items))
-
-                    control.window.clearProperty(self.metaProperty)
-                    control.window.setProperty(self.metaProperty, meta)
-
-                    control.sleep(200)
-                    control.execute(
-                        "Container.Update(%s?action=addItem&title=%s)"
-                        % (sys.argv[0], urllib.quote_plus(title))
-                    )
-
-                    return "DIR"
-
-            except:
-                try:
-                    progressDialog.close()
-                except:
-                    pass
-                return
-        else:
-            try:
-                progressDialog.close()
-            except:
-                pass
-
-            self.sourcesFilter()
-
-            return self.sources
+        return self.sources
 
     def prepareSources(self):
         try:
@@ -1709,10 +1644,14 @@ class sources:
                 log("FanFilm.Sortowanie Sortuję według dostawców")
                 self.sources = sorted(self.sources,
                                       key=lambda d: (not d["source"].startswith("pobrane"), language_order[d["language"]], quality_order[d['quality']], d["provider"]))
+                self.sources = sorted(self.sources,
+                                      key=lambda d: (not d["source"].startswith("external"), language_order[d["language"]], quality_order[d['quality']], d["provider"]))
             if sort_source is "1":
                 log("FanFilm.Sortowanie Sortuję według źródeł")
                 self.sources = sorted(self.sources,
                                       key=lambda d: (not d["source"].startswith("pobrane"), language_order[d["language"]], quality_order[d['quality']], d["source"]))
+                self.sources = sorted(self.sources,
+                                      key=lambda d: (not d["source"].startswith("external"), language_order[d["language"]], quality_order[d['quality']], d["provider"]))
 
         for i in range(len(self.sources)):
 
@@ -1789,7 +1728,7 @@ class sources:
             label = re.sub("\|\s+\|", "|", label)
             label = re.sub("\|(?:\s+|)$", "", label)
 
-            if (d or p.lower() == "tb7") or (d or p.lower() == "xt7") or (d or p.lower() == "pobrane"):
+            if (d or p.lower() == "tb7") or (d or p.lower() == "xt7") or (d or p.lower() == "pobrane") or (d or p.lower() == "external"):
                 if not prem_identify == "nocolor":
                     self.sources[i]["label"] = (
                         ("[COLOR %s]" % (prem_identify)) + label.upper() + "[/COLOR]"
@@ -1826,8 +1765,11 @@ class sources:
             call = [i[1] for i in self.sourceDict if i[0] == provider][0]
             u = url = call.resolve(url)
 
+
             if url == None or (not "://" in str(url) and not local):
                 if provider == 'netflix':
+                    return url
+                if provider == 'external':
                     return url
 
                 raise Exception()

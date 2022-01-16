@@ -699,7 +699,7 @@ msgstr "Brak dostępnych źródeł"
 
 #: 
 msgctxt "#32402"
-msgid "Playback outside Covenant is not allowed"
+msgid "Playback outside FanFilm is not allowed"
 msgstr "Odtwarzanie poza FanFilm nie jest możliwe"
 
 #: 

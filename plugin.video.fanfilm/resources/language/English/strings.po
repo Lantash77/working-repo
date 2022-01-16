@@ -1,10 +1,10 @@
-# Addon Name: Covenant
+# Addon Name: FanFilm
 # Addon id: plugin.video.fanfilm
 # Addon Provider: Fanfilm
 # Translators:
 msgid ""
 msgstr ""
-"Project-Id-Version: Covenant\n"
+"Project-Id-Version: FanFilm\n"
 "POT-Creation-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "PO-Revision-Date: 2016-08-01 02:03+0000\n"
 "Last-Translator: lambda81\n"
@@ -569,7 +569,7 @@ msgid "No stream available"
 msgstr ""
 
 msgctxt "#32402"
-msgid "Playback outside Covenant is not allowed"
+msgid "Playback outside FanFilm is not allowed"
 msgstr ""
 
 msgctxt "#32403"

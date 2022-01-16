@@ -161,13 +161,13 @@ def markEpisodeDuringPlayback(imdb, tvdb, season, episode, watched):
             raise Exception()
 
         if int(watched) == 7:
-            trakt.markEpisodeAsWatched(tvdb, season, episode)
+            trakt.markEpisodeAsWatched(imdb, season, episode)
         else:
-            trakt.markEpisodeAsNotWatched(tvdb, season, episode)
+            trakt.markEpisodeAsNotWatched(imdb, season, episode)
         trakt.cachesyncTVShows()
 
         if trakt.getTraktAddonEpisodeInfo() == True:
-            trakt.markEpisodeAsNotWatched(tvdb, season, episode)
+            trakt.markEpisodeAsNotWatched(imdb, season, episode)
     except:
         pass
 

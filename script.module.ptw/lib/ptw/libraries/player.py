@@ -20,17 +20,13 @@
 import base64
 import codecs
 import gzip
-import hashlib
 import json
 import os
 import re
 import sys
-import time
 from urllib.parse import quote_plus, unquote_plus
-import xmlrpc.client
 
 import xbmc
-import xbmcvfs
 
 import six
 
@@ -82,26 +78,25 @@ class player(xbmc.Player):
                 control.player.play(url, item)
 
             control.resolve(int(sys.argv[1]), True, item)
+            if control.condVisibility('System.HasAddon(script.trakt)'):
+                control.window.setProperty('script.trakt.ids', json.dumps(self.ids))
 
-            control.window.setProperty('script.trakt.ids', json.dumps(self.ids))
+                self.keepPlaybackAlive()
 
-            self.keepPlaybackAlive()
-
-            control.window.clearProperty('script.trakt.ids')
+                control.window.clearProperty('script.trakt.ids')
         except:
-            log_utils.log('player_fail', 1)
+            log_utils.log('player_fail', 'module')
             return
 
 
     def getMeta(self, meta):
-
         try:
-            poster = meta['poster']
-            thumb = meta.get('thumb') or poster
-            fanart = meta['fanart']
-            clearlogo = meta.get('clearlogo')
-            clearart = meta.get('clearart')
-            discart = meta.get('discart')
+            poster = meta['poster'] if "poster" in meta.keys() else ''
+            thumb = meta['thumb'] if "thumb" in meta.keys() else '' or poster
+            fanart = meta['fanart'] if "fanart" in meta.keys() else ''
+            clearlogo = meta['clearlogo'] if "clearlogo" in meta.keys() else ''
+            clearart = meta['clearart'] if "clearart" in meta.keys() else ''
+            discart = meta['discart'] if "discart" in meta.keys() else ''
 
             return poster, thumb, fanart, clearlogo, clearart, discart, meta
         except:
@@ -209,7 +204,7 @@ class player(xbmc.Player):
                     self.totalTime = self.getTotalTime()
                     self.currentTime = self.getTime()
 
-                    watcher = (self.currentTime / self.totalTime >= .92)
+                    watcher = (self.currentTime / self.totalTime >= .85)
                     property = control.window.getProperty(pname)
 
                     if watcher == True and not property == '7':
@@ -231,7 +226,7 @@ class player(xbmc.Player):
                     self.totalTime = self.getTotalTime()
                     self.currentTime = self.getTime()
 
-                    watcher = (self.currentTime / self.totalTime >= .92)
+                    watcher = (self.currentTime / self.totalTime >= .85)
                     property = control.window.getProperty(pname)
 
                     if watcher == True and not property == '7':
@@ -296,34 +291,6 @@ class player(xbmc.Player):
 
         subtitles().get(self.name, self.imdb, self.season, self.episode)
         self.idleForPlayback()
-
-
-    def onPlayBackStarted(self):
-        if control.getKodiVersion() < 18:
-            control.execute('Dialog.Close(all,true)')
-
-            if control.setting('bookmarks') == 'true' and int(self.offset) > 120 and self.isPlayingVideo():
-                if control.setting('bookmarks.auto') == 'true':
-                    self.seekTime(float(self.offset))
-                else:
-                    self.pause()
-                    minutes, seconds = divmod(float(self.offset), 60)
-                    hours, minutes = divmod(minutes, 60)
-                    label = '%02d:%02d:%02d' % (hours, minutes, seconds)
-                    label = control.lang2(12022).format(label)
-                    if control.setting('resume.source') == '1' and trakt.getTraktCredentialsInfo() == True:
-                        yes = control.yesnoDialog(label + '[CR]  (Trakt scrobble)', heading=control.lang2(13404))
-                    else:
-                        yes = control.yesnoDialog(label, heading=control.lang2(13404))
-                    if yes:
-                        self.seekTime(float(self.offset))
-                    control.sleep(1000)
-                    self.pause()
-
-            subtitles().get(self.name, self.imdb, self.season, self.episode)
-            self.idleForPlayback()
-        else:
-            pass
 
 
     def onPlayBackStopped(self):

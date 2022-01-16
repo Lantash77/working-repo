@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 """
-    Incursion Add-on
+    FanFilm Add-on
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -344,7 +344,7 @@ class libtvshows:
         self.infoDialog = False
         self.block = False
 
-    def add(self, tvshowtitle, year, imdb, tvdb, season, episode, meta, range=False):
+    def add(self, tvshowtitle, year, imdb, tvdb, season=None, episode=None, meta=None, range=False):
         if (
             not control.condVisibility("Window.IsVisible(infodialog)")
             and not control.condVisibility("Player.HasVideo")

@@ -25,9 +25,9 @@ class source:
         self.language = ["en"]
         self.domains = [
             "tunemovie.com",
-            "xmovies.is",
+            "ww.xmovies.is",
             "pubfilmfree.com",
-            "123movies.sc",
+            "ww.123movies.sc",
         ]
         self.base_link = ""
         self.search_link = "/search/%s.html"
@@ -88,7 +88,6 @@ class source:
             query = self.search_link % quote_plus(title)
 
             r, self.base_link = client.list_request(self.domains, query)
-            # log_utils.log('tunemovie self.base_link: \n' + repr(self.base_link))
 
             if not "tvshowtitle" in data:
                 if "123movies.sc" in self.base_link:
@@ -290,7 +289,7 @@ class source:
                         "source": "tunestream",
                         "quality": quality,
                         "language": "en",
-                        "info": info,
+                        #"info": info,
                         "url": link,
                         "direct": True,
                         "debridonly": False,

@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<addon id="plugin.video.fanfilm" name="FanFilm" version="2021.11.25.4" provider-name="-">
+<addon id="plugin.video.fanfilm" name="FanFilm" version="2022.01.16.0-alfa" provider-name="-">
     <requires>
         <import addon="xbmc.python" version="3.0.0"/>
-        <import addon="script.module.ptw" version="2021.02.28.1"/>
+        <import addon="script.module.ptw" version="2021.11.24.1"/>
         <import addon="script.module.requests"/>
         <import addon="script.module.metahandler" version="5.0.0"/>
         <import addon="script.module.beautifulsoup4"/>
@@ -27,8 +27,25 @@
         </assets>
 		<news>
 Changelog:
-2021.11.24.3
-- nazwy seriali po polsku i spłaszczanie sezonów
+2022.01.16
+- Nowe źródła Netflix, Amazon Prime, Disney+
+  wtyczka sprawdza, czy dany film/serial jest dostępny u operatorów
+  po wybraniu odtwarzania - uruchamia potrzebną wtyczkę
+  wymagane i obsługiwane wtyczki:
+  'plugin.video.netflix'       repo - castagnaIT
+  'plugin.video.amazon-test'   repo - https://github.com/Sandmann79/
+  'slyguy.disney.plus'         repo - https://k.slyguy.xyz
+2021.11.29
+- fix plakatów w filmach
+2021.11.27
+- porządki
+- poprawa nazw gatunków
+2021.11.25.0
+- netflix dla seriali
+2021.11.24.4
+- brakujące meta w serialach
+- nazwy seriali/filmów po polsku i spłaszczanie sezonów
+- poprawa nazw gatunków
 2021.11.24.1
 - fix czyszczenia cache
 2021.11.23.0

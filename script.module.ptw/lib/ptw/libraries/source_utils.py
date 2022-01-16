@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 """
-    Covenant Add-on
+    FanFilm Add-on
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -38,6 +38,7 @@ from ptw.libraries import client
 from ptw.libraries import directstream
 from ptw.libraries import pyaes
 from ptw.libraries import trakt
+from ptw.libraries import cleantitle
 
 RES_4K = [' 4k', ' hd4k', ' 4khd', ' uhd', ' ultrahd', ' ultra hd', ' 2160', ' 2160p', ' hd2160', ' 2160hd']
 RES_1080 = [' 1080', ' 1080p', ' 1080i', ' hd1080', ' 1080hd', ' m1080p', ' fullhd', ' full hd', ' fhd', ' 1o8o',
