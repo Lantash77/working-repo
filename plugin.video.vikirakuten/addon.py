@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 """
-    VIKI Rakuten® addon Add-on
+    VIKI Rakuten® addon Add-on test
 """
 
 import re
