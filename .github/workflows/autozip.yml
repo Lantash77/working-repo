@@ -7,7 +7,10 @@ name: GenerateZips
 on:
   push:
     branches:    
-      - 'main'    
+      - 'main'
+    paths:
+      - '*/addon.xml'
+        
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
@@ -27,9 +30,9 @@ jobs:
           - name: commit to repo
             run: |
               git config --local user.email "github_action@github.com"
-              git config --local user.name "GitHub Action test"
+              git config --local user.name "GitHub Action Bot"
               git add ./zips
-              git commit -m "Add changes"
+              git commit -m "Automatyczne generowanie zipów do repo"
           - name: Push changes
             uses: ad-m/github-push-action@master
             with:
