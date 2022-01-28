@@ -24,7 +24,18 @@ jobs:
           - name: make zips # run the run.py to get the latest data
             run: |
               python repo_generator.py
-              mv zips working-repo
+          - name: commit to repo
+            run: |
+              git config --local user.email "github_action@github.com"
+              git config --local user.name "GitHub Action test"
+              git add ./zpis
+              git commit -m "Add changes"
+          - name: Push changes
+            uses: ad-m/github-push-action@master
+            with:
+              github_token: ${{ secrets.UPLOAD }}
+              
+        
           
             
             
