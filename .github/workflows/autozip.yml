@@ -28,7 +28,7 @@ jobs:
             run: |
               git config --local user.email "github_action@github.com"
               git config --local user.name "GitHub Action test"
-              git add ./zpis
+              git add ./zips
               git commit -m "Add changes"
           - name: Push changes
             uses: ad-m/github-push-action@master
