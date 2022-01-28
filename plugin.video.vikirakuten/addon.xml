@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
-<addon id="plugin.video.vikirakuten" name="VIKI Rakuten®" version="0.0.0.6" provider-name="Lantash">
+<addon id="plugin.video.vikirakuten" name="VIKI Rakuten®" version="0.0.0.7" provider-name="Lantash">
   <requires>
 	<import addon="xbmc.python" version="3.0.0"/>
 	<import addon="inputstream.adaptive" version="2.1.0"/>
