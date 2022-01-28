@@ -23,6 +23,6 @@ jobs:
               python-version: 3.8 #install the python needed
           - name: make zips # run the run.py to get the latest data
             run: |
-              python generator.py
+              python repo_generator.py
             
       
