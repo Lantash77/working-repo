@@ -6,12 +6,8 @@ name: Manual workflow
 # or API.
 on:
   push:
-    types:
-      - opened
     branches:    
-      - 'main'
-    paths:
-      - 'addon.xml'
+      - 'main'    
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
