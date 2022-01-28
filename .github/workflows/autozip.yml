@@ -26,6 +26,6 @@ jobs:
               python repo_generator.py
           - name: save zips
             uses: actions/upload-artifact@v2
-            path: ./
+            path: working-repo/
             
       
