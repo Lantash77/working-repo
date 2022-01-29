@@ -2,15 +2,21 @@
 import sys
 import re
 import urllib.request, urllib.parse, urllib.error
-from urllib.parse import parse_qs, quote_plus
-
+from urllib.parse import parse_qs, quote_plus, urlencode, unquote
+from resources.libs import dqplayer
 import xbmc
 import xbmcgui
 import xbmcplugin
 import xbmcaddon
+import inputstreamhelper
+
+from resources.libs import cache
+
 
 my_addon = xbmcaddon.Addon()
 Getsetting = my_addon.getSetting
+SetSetting = my_addon.setSetting
+
 
 def addDir(name, url, mode='', icon='', thumb='', fanart='', poster='', banner='', clearart='', clearlogo='',
            genre='', year='', rating='', dateadded='', plot='', subdir='',
@@ -22,7 +28,7 @@ def addDir(name, url, mode='', icon='', thumb='', fanart='', poster='', banner='
          + '&subdir=' + quote_plus(subdir))
     liz = xbmcgui.ListItem(name)
     contextmenu = []
-    contextmenu.append(('Informacja', 'Action(Info)'), )    
+    contextmenu.append(('Informacja', 'Action(Info)'), )
     info = {
         'title': name,
         'genre': genre,
@@ -86,7 +92,6 @@ def addLink(name, url, mode='', icon='', thumb='', fanart='', poster='',
     xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]), url=u, listitem=liz,
                                 isFolder=isFolder, totalItems=total)
 
-
 def get_params():
     paramstring = sys.argv[2]
     if paramstring.startswith('?'):
@@ -94,46 +99,48 @@ def get_params():
     return dict((k, vv[0]) for k, vv in parse_qs(paramstring).items())
 
 def PlayFromHost(url, mode, title, subdir=''):
+    try:
+        from urllib.parse import urlencode, quote_plus, quote, unquote
+    except ImportError:
+        from urllib import urlencode, quote_plus, quote, unquote
 
     if 'google' in url:
         url = url.replace('preview', 'view')
-#DQ Player    
-    try:
-        if 'https://dramaqueen.pl/player.php' in url:
 
-            pattern = r'https://(.+?)url='
-            videolink = re.sub(pattern, '', url)
-            if mode == 'play':
-                li = xbmcgui.ListItem(title, path=str(videolink))
-                xbmcplugin.setResolvedUrl(handle=int(sys.argv[1]), succeeded=True, listitem=li)
-            elif mode == 'download':
-                from resources.libs import downloader
-                dest = Getsetting("download.path")
-                downloader.download(title, 'image', videolink, dest, subdir)
-#Send to resolver           
-        else:
-            import resolveurl
-            try:
-                stream_url = resolveurl.resolve(url)
-                xbmc.log('DramaQueen.pl | wynik z resolve  : %s' % stream_url, xbmc.LOGINFO)
-                if mode == 'play':
-                    li = xbmcgui.ListItem(title, path=str(stream_url))
-                    xbmcplugin.setResolvedUrl(handle=int(sys.argv[1]), succeeded=True, listitem=li)
-                elif mode == 'download':
-                    from resources.libs import downloader
-                    dest = Getsetting("download.path")
-                    downloader.download(title, 'image', stream_url, dest, subdir)
-            except:
-                exit()
-                
-    except:
-        d = xbmcgui.Dialog()
-        d.notification('dramaqueen.pl ', 
-                       '[COLOR red]Problem  -  Nie można wyciągnąć linku[/COLOR]', 
-                       xbmcgui.NOTIFICATION_INFO, 5000)
-                                     
+    #DQ Player
+    if 'dqplayer' in url:
+        proxyport = Getsetting('proxyport')
+        videolink = url.split('|')[1]
+
+        strmUrl, stream_header = dqplayer.fetch(videolink)
+
+        stream_header = urlencode(stream_header)
+        SetSetting('hdk', str(stream_header))
+
+        PROTOCOL = 'hls'
+        DRM = 'com.widevine.alpha'
+
+        import inputstreamhelper
+
+        is_helper = inputstreamhelper.Helper(PROTOCOL)
+
+        prxy ='http://127.0.0.1:%s/tqdrama='%(str(proxyport))
+        strmUrl = prxy+strmUrl
+
+        if is_helper.check_inputstream():
+            play_item = xbmcgui.ListItem(path=strmUrl)
+
+            play_item.setMimeType('application/x-mpegURL')
+            play_item.setContentLookup(False)
+            play_item.setProperty('inputstream', is_helper.inputstream_addon)
+            play_item.setProperty('inputstream.adaptive.manifest_type', 'hls')
+            play_item.setProperty('inputstream.adaptive.stream_headers', stream_header)
+            play_item.setProperty('IsPlayable', 'true')
+
+            xbmcplugin.setResolvedUrl(handle=int(sys.argv[1]), succeeded=True, listitem=play_item)
+
 def SourceSelect(players, links, title, subdir=''):
-    
+
     if len(players) > 0:
         d = xbmcgui.Dialog()
         select = d.select('Wybór playera', players)

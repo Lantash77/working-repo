@@ -1,11 +1,6 @@
 '''
     Simple XBMC Download Script
-    
-    Lantash MOD
-    
     Copyright (C) 2013 Sean Poyser (seanpoyser@gmail.com)
-    
-    
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by

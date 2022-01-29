@@ -33,16 +33,7 @@ search_url = 'https://www.dramaqueen.pl/?s=%s'
 sess = requests.session()
 
 headersget = {
-    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/71.0.3578.75 Safari/537.36',
-#    'authority': 'www.dramaqueen.pl',
-
-#    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
-#    'Accept-Language': 'pl,en-US;q=0.7,en;q=0.3',
-#    'Connection': 'keep-alive',
-#    'content-type': 'application/json',
-#    'Upgrade-Insecure-Requests': '1',
-#    'Pragma': 'no-cache',
-#    'Cache-Control': 'max-age=0',
+    'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/97.0.4692.99 Mobile Safari/537.36 Edg/97.0.1072.69'
 }
 
 DKorea = 'Drama Koreańska'
@@ -345,12 +336,13 @@ def ListEpisodes():
 def WyswietlanieLinkow():
     Logowanie(False)
     cookie = cache.cache_get('dramaqueen_cookie')['value']
-    headersget.update({'Cookie': cookie})    
-    
+    headersget.update({'Cookie': cookie})
+
     url = params['url']
     name = params['name']
     subdir = params['subdir']
     html = requests.get(url, headers=headersget, timeout=15).text
+    html = html.replace('&#8211;', '-').replace('&nbsp;', ' ')
     LoginCheck(html)
     results = [item for item in parseDOM(html, 'section', attrs={'class': 'av_toggle_section ' +r'.+?'})]
     
@@ -366,7 +358,12 @@ def WyswietlanieLinkow():
     else:        
         
         avlinks = [parseDOM(item, 'a', ret='href') for item in results][0]
-        avplayers = [parseDOM(item, 'button') for item in results][0]        
+        avplayers = [parseDOM(item, 'button') for item in results][0]
+
+    for i in avplayers:
+        if i == 'DQ - test' or 'DQ-test':
+            index = avplayers.index(i)
+            avlinks[index] = 'dqplayer|' + avlinks[index]
          
     addon.SourceSelect(players=avplayers, links=avlinks, title=name, subdir=subdir)
     
