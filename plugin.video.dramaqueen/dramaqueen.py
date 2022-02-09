@@ -19,6 +19,10 @@ from resources.libs import cache
 from resources.libs import addon_tools as addon
 from resources.libs import dqscraper
 
+sys.path.append("C:\Program Files\JetBrains\PyCharm 2021.2.2\debug-eggs\pydevd-pycharm.egg")
+import pydevd_pycharm
+pydevd_pycharm.settrace('localhost', port=5678, stdoutToServer=True, stderrToServer=True)
+
 my_addon = xbmcaddon.Addon()
 my_addon_id = my_addon.getAddonInfo('id')
 DATA_PATH = xbmcvfs.translatePath(my_addon.getAddonInfo("profile"))
@@ -361,7 +365,8 @@ def WyswietlanieLinkow():
         avplayers = [parseDOM(item, 'button') for item in results][0]
 
     for i in avplayers:
-        if i == 'DQ - test' or 'DQ-test':
+        if i == ('DQ - test' or 'DQ-test'):
+            test = i
             index = avplayers.index(i)
             avlinks[index] = 'dqplayer|' + avlinks[index]
          
