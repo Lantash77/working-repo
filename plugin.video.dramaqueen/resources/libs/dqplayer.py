@@ -39,6 +39,6 @@ def fetch(url):
     # hls
     strmUrl = base_url + id + '/' + res
 
-    return strmUrl, headers_src
+    return strmUrl, headers_src, activate_url, headers_activate
 
 

@@ -113,9 +113,12 @@ def PlayFromHost(url, mode, title, subdir=''):
             proxyport = Getsetting('proxyport')
             videolink = url.split('|')[1]
 
-            strmUrl, stream_header = dqplayer.fetch(videolink)
+            strmUrl, stream_header, activate_url, headers_activate = dqplayer.fetch(videolink)  #patch
 
             stream_header = urlencode(stream_header)
+            activate_header = urlencode(headers_activate) ##patch
+            SetSetting('hda', str(activate_header))       ## patch
+            SetSetting('urla', str(activate_url))        ## patch
             SetSetting('hdk', str(stream_header))
 
             PROTOCOL = 'hls'
@@ -125,7 +128,7 @@ def PlayFromHost(url, mode, title, subdir=''):
 
             is_helper = inputstreamhelper.Helper(PROTOCOL)
 
-            prxy ='http://127.0.0.1:%s/tqdrama='%(str(proxyport))
+            prxy = f'http://127.0.0.1:{proxyport}/tqdrama='
             strmUrl = prxy+strmUrl
 
             if is_helper.check_inputstream():
@@ -140,7 +143,7 @@ def PlayFromHost(url, mode, title, subdir=''):
 
                 xbmcplugin.setResolvedUrl(handle=int(sys.argv[1]), succeeded=True, listitem=play_item)
 
-                # Send to resolver
+    # Send to resolver
         else:
             import resolveurl
             try:

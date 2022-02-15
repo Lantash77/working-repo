@@ -59,12 +59,18 @@ class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
         
         if 'tqdrama=' in path:
             hdk = addon.getSetting('hdk')
+            hda = addon.getSetting('hda')
+            hda2 = dict(parse_qsl(hda))
+            urla = addon.getSetting('urla')
                 
             hdk2 = dict(parse_qsl(hdk))
             licurl = self.parseUrl('tqdrama=')
 
             if 'video.drm' in (self.path):
-                result1 = requests.get(url=licurl, headers=hdk2, verify=False, timeout = 30).text
+                sess = requests.session()
+                r = sess.get(url=urla, headers=hda2)
+                result1 = sess.get(url=licurl, headers=hdk2, verify=False, timeout=30).text
+ #test          result1 = requests.get(url=licurl, headers=hdk2, verify=False, timeout=30).text
 
                 #uri,sequence = re.findall('\,URI="(.+?)",IV\=0x(.+?)\\n',result1,re.DOTALL)[0]
                 

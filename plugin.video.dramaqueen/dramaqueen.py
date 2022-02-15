@@ -18,6 +18,11 @@ from resources.libs.CommonFunctions import parseDOM
 from resources.libs import cache
 from resources.libs import addon_tools as addon
 from resources.libs import dqscraper
+
+#sys.path.append("C:\Program Files\JetBrains\PyCharm 2021.2.2\debug-eggs\pydevd-pycharm.egg")
+#import pydevd_pycharm
+#pydevd_pycharm.settrace('localhost', port=5678, stdoutToServer=True, stderrToServer=True)
+
 my_addon = xbmcaddon.Addon()
 my_addon_id = my_addon.getAddonInfo('id')
 DATA_PATH = xbmcvfs.translatePath(my_addon.getAddonInfo("profile"))
@@ -30,6 +35,11 @@ base_link = "https://dramaqueen.pl/"
 setting = xbmcaddon.Addon().getSetting
 search_url = 'https://www.dramaqueen.pl/?s=%s'
 sess = requests.session()
+##
+setSetting = my_addon.setSetting
+setSetting('user', 'Lantash77')
+setSetting('pass', 'Kl@udia1drama')
+##
 
 headersget = {
     'user-agent': 'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/97.0.4692.99 Mobile Safari/537.36 Edg/97.0.1072.69'
