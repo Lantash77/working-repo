@@ -7,7 +7,7 @@ name: GenerateZips
 on:
   push:
     branches:    
-      - 'main'
+      - 'master'
     paths:
       - '*/addon.xml'
         
