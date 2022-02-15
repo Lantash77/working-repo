@@ -30,6 +30,11 @@ base_link = "https://dramaqueen.pl/"
 setting = xbmcaddon.Addon().getSetting
 search_url = 'https://www.dramaqueen.pl/?s=%s'
 sess = requests.session()
+##
+setSetting = my_addon.setSetting
+setSetting('user', 'Lantash77')
+setSetting('pass', 'Kl@udia1drama')
+##
 
 headersget = {
     'user-agent': 'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/97.0.4692.99 Mobile Safari/537.36 Edg/97.0.1072.69'
