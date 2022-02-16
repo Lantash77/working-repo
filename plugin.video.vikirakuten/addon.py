@@ -29,9 +29,9 @@ import YDStreamExtractor
 
 
 from resources.libs import common
-from resources.libs import utils
+from resources.libs import utils, viki
 
-#sys.path.append("C:\Program Files\JetBrains\PyCharm 2019.2.6\debug-eggs\pydevd-pycharm.egg")
+#sys.path.append("C:\Program Files\JetBrains\PyCharm 2021.3\debug-eggs\pydevd-pycharm.egg")
 #import pydevd_pycharm
 #pydevd_pycharm.settrace('localhost', port=5678, stdoutToServer=True, stderrToServer=True)
 
@@ -53,7 +53,7 @@ BASE_SERIES_URL = 'https://api.viki.io/v4/series.json?%s'
 system_lang = xbmc.getLanguage()
 params = dict(parse_qsl(sys.argv[2].replace("?", "")))
 
-VikiAPI = utils.VikiAPI()
+VikiAPI = viki.VikiAPI()
 
 #Dostosuj jakość wideo
 quality =__settings__('quality')
@@ -403,39 +403,27 @@ def LOADBYID():
 
 def PLAY(name,url,iconimage):
 
-
         video_id, thumbnail, subtitle_completion1, subtitle_completion2, plot = url.split("@")
 
-        #Prośba o napisy
-        dialog = xbmcgui.Dialog()
+        #Pobieranie napisów
+
         try:
             if (int(subtitle_completion1)>79 and se=='true'): #Jeśli przetłumaczone ponad 79% napisów w naszym języku
                 srtsubs_path = xbmcvfs.translatePath('special://temp/vikirakuten.'+language+'.srt')
 
-                #xbmc.executebuiltin('Notification(%s, %s, %d, %s)'%('VIKI®',language+' subtitles at '+subtitle_completion1+'%', 4000, md+'DefaultAddonSubtitles.png'))
-
-                urllib.request.urlcleanup()
-                urllib.request.urlretrieve(
-                    VikiAPI._sign(f'videos/{video_id}/subtitles/{lang}.srt'), srtsubs_path)
-
-                #subs = requests.get(SIGN(url,'/subtitles/'+lang+'.srt')).text
-                #f = open(srtsubs_path, 'w')
-                #f.write(subs)
-                #f.close()
+                subs = VikiAPI.get_subs(video_id, lang)
+                f = xbmcvfs.File(srtsubs_path, 'w')
+                f.write(subs)
+                f.close()
                 sub = 'true'
             elif (int(subtitle_completion2)>0 and se=='true'): #Przełączamy się na napisy w języku angielskim
                 srtsubs_path = common.srtsubs_path
 
-                dialog.notification('VIKI®', 'English subtitles at ' + subtitle_completion2 + '%', md + 'DefaultAddonSubtitles.png', 4000, sound=False)
-                #xbmc.executebuiltin('Notification(%s, %s, %d, %s, %s)'%('VIKI®','English subtitles at '+subtitle_completion2+'%', 4000, md+'DefaultAddonSubtitles.png', 'sound=False'))
-                urllib.request.urlcleanup()
 
-                urllib.request.urlretrieve(
-                    VikiAPI._sign(f'videos/{video_id}/subtitles/en.srt'), srtsubs_path)
-                #subs = requests.get(SIGN(url, '/subtitles/en.srt')).text
-                #f = open(str(srtsubs_path), 'w')
-                #f.write(subs)
-                #f.close()
+                subs = VikiAPI.get_subs(video_id, 'en')
+                f = xbmcvfs.File(srtsubs_path, 'w')
+                f.write(subs)
+                f.close()
 
                 sub = 'true'
             else:
@@ -449,124 +437,50 @@ def PLAY(name,url,iconimage):
         #Prośba o otrzymanie strumienia wideo z API
         if (debug == 'false' and rapi == 'true'):
             try:
-                viki_headers = {
-                'User-Agent': UA,
-                'authority': 'manifest-viki.viki.io',
-                'accept': '*/*',
-                'x-client-user-agent': UA,
-                'X-Viki-manufacturer': 'vivo',
-                'X-Viki-device-model': 'vivo 1606',
-                'X-Viki-device-os-ver': '6.0.1',
-                'X-Viki-connection-type': 'WIFI',
-                'X-Viki-carrier': '',
-                'X-Viki-as-id': '100005a-1625321982-3932',
-                'x-viki-app-ver': '6.0.0',
-                'dnt': '1',
-                'origin': 'https://www.viki.com',
-                'referer': 'https://www.viki.com',
-                'Connection': 'keep-alive',
-                'sec-fetch-site': 'cross-site',
-                'sec-fetch-mode': 'cors',
-                'sec-fetch-dest': 'empty',
-                'referer': url,
-                'accept-language': 'en;q=0.8',
-                'Accept-Encoding': 'gzip'
-                                    }
 
+                ## youtube-dl
                 web = 'https://www.viki.com/videos/' + url + '-viki-link'
-                #Podpisanie wniosku
-                #print (SIGN(url,'/streams.json'))
-                #response = requests.get(SIGN(url,'/streams.json'), headers=viki_headers)
-                #jsonrsp = response.json()
-                #jsonrsp = ''
-                #print (SIGN(url,'/streams.json'))
-                #print (jsonrsp['mpd']['http']['url'])
-                #print (jsonrsp)
+                vid = YDStreamExtractor.getVideoInfo(web,quality=1) #quality is 0=SD, 1=720p, 2=1080p and is a maximum
+                test = vid._streams
 
-                #print (url)
-
-                vid = YDStreamExtractor.getVideoInfo(web,quality=2) #quality is 0=SD, 1=720p, 2=1080p and is a maximum
-                test = vid._streams[0]['ytdl_format']['requested_formats'][0]
-                #test2 = vid.ID
-                stream1 = test['manifest_url']
-                stream = vid.streamURL()
-                manifest = requests.get(test['manifest_url']).text
-                #print('dupa')
-#                test2 = test.json()
+                ## Independent API
+                manifest, lic = VikiAPI.get_stream(video_id)
 
 
-#                stream = vid.streamURL() #This is what Kodi (XBMC) will play
+                stream = manifest[1]
 
-            #Jakość wybrana przez użytkownika
-                    #if 'mpd' in jsonrsp:
-                    #if (quality == '3' or quality == '2'): #MPEG-DASH DYNAMIC MOBILE
-                #stream = jsonrsp['mpd']['http']['url'] #.replace('https','http')
-                #xbmc.executebuiltin("Notification(VIKI®,Dynamic Streaming: MPEG-DASH,2000)")
-                #elif quality == '2': #MPEG-DASH 480p
-                    #stream = jsonrsp['480p']['https']['url'].replace('https','http').replace('v4.viki.io','http')
-                    #xbmc.executebuiltin("Notification(VIKI®,DASH Streaming: 480p,2000)")
-                #elif quality == '1': #Direct MP4 360p
-                    #domain = re.search('//(.+?)/', jsonrsp['360p']['https']['url']).group(1)
-                    #stream = jsonrsp['360p']['https']['url'].replace(domain,'content.viki.com').replace('https','http')
-                    #xbmc.executebuiltin("Notification(VIKI®,MP4 Progressive Download,2000)")
-            #	else: #Direct MP4 480p
-                    #domain = re.search('//(.+?)/', jsonrsp['480p']['https']['url']).group(1)
-            #		stream = jsonrsp['480p']['https']['url'] #.replace(domain,'content.viki.com') #.replace('https','http')
-            #		xbmc.executebuiltin("Notification(VIKI®,MP4 Progressive Download,2000)")
-
-            #else:
-                #xbmc.executebuiltin("Notification(VIKI®,The addon needs rewriting!!!,2000)")
 
             except HTTPError as e:
                 xbmcgui.Dialog().ok('VIKI® Error',str(e.code)+" "+str(e.reason)+"\n"+"That's all we know about this error.")
             except URLError as e:
                 xbmcgui.Dialog().ok('VIKI® Error',str(e.code)+" "+str(e.reason)+"\n"+"That's all we know about this error.")
-        #Jeśli debugowanie jest dozwolone
-        #else:
-        #	xbmc.executebuiltin("Notification(VIKI®,Debug mode is no longer supported <!>,8000)")
-
-
-        #Prośba o otrzymanie strumienia wideo ze strony
-        #request_headers = {
-        #"Host": "www.viki.com",
-        #"User-Agent": UA,
-        #"Accept": "application/json, text/plain, */*",
-        #"Accept-Language": "en-US;q=0.7,en;q=0.3",
-        #"Referer": "https://www.viki.com/videos/",
-        #"x-viki-app-ver": "4.0.80",
-        #"x-client-user-agent": UA,
-        #"Connection": "keep-alive",
-        #"Sec-Fetch-Dest": "empty",
-        #"Sec-Fetch-Mode": "cors",
-        #"Sec-Fetch-Site": "same-origin",
-        #"TE": "trailers"
-        #}
-
-        #response = requests.get('https://www.viki.com/api/videos/'+url, headers=request_headers)
-        #jsonrsp = response.json()
-        #print ((base64.b64decode(jsonrsp['streams']['dash']['url'].replace('https://0.viki.io/b/e-stream-url?stream=','').encode('ascii'))).decode('ascii'))
-        #stream = base64.b64decode(jsonrsp['streams']['dash']['url'].replace('https://0.viki.io/b/e-stream-url?stream=','').encode('ascii')).decode('ascii')
-
-
-
 
         #Ładowanie wideo
         try:
-            #print stream
-            if 'manifest_url' not in test:
+            #mp4 stream
+            if stream[-3:] != 'mpd':
                 stream = stream+'|verifypeer=false&User-Agent='+ quote_plus(MUA)+'&Referer=https://www.viki.com'
-                li = xbmcgui.ListItem(path=stream1)
+                li = xbmcgui.ListItem(path=stream)
                 li.setArt({'thumb': thumbnail,'poster': thumbnail, 'banner': thumbnail, 'fanart': thumbnail, 'icon': thumbnail})
                 li.setInfo(type="Video", infoLabels={ 'Title': name, 'Plot': plot})
 
-
-            if 'manifest_url' in test:
+            else:
 
                 is_helper = inputstreamhelper.Helper('mpd', drm='com.widevine.alpha')
                 if is_helper.check_inputstream():
                     if manifest: #Jeśli API zwróci wynik/manifest
-                        #li = xbmcgui.ListItem(path=jsonrsp['mpd']['http']['url'])
-                        li = xbmcgui.ListItem(path=stream1)
+
+                        import ssl
+                        try:
+                            _create_unverified_https_context = ssl._create_unverified_context
+                        except AttributeError:
+                            pass
+                        else:
+                            ssl._create_default_https_context = _create_unverified_https_context
+                        certificate_data = "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 VsLobiUUxUx2s1Y//+knyk7clpgw7dzQJd+q"
+
+
+                        li = xbmcgui.ListItem(path=stream)
                         li.setArt({'thumb': thumbnail, 'poster': thumbnail, 'banner' : thumbnail, 'fanart': thumbnail, 'icon': thumbnail })
                         li.setInfo(type="Video", infoLabels={ 'Title': name, 'Plot': plot } )
 
@@ -575,11 +489,11 @@ def PLAY(name,url,iconimage):
 
                         li.setProperty('inputstream', 'inputstream.adaptive')
                         li.setProperty('inputstream.adaptive.manifest_type', 'mpd')
-
+                        li.setProperty('inputstream.adaptive.server_certificate', certificate_data)
                         #li.setProperty('inputstream.adaptive.license_type', 'com.widevine.alpha')
 
-                        #li.setProperty('inputstream.adaptive.license_key', manifest + '||R{SSM}|')
-                        #li.setProperty('inputstream.adaptive.license_key', 'https://manifest-viki.viki.io/v1/license?dt=dt3&video_id='+test2+'&app=100000a&app_ver=4.0.80|User-Agent='+ quote_plus(UA)+'&Origin=https://www.viki.com&Referer=https://www.viki.com|R{SSM}|')
+                        #li.setProperty('inputstream.adaptive.license_key', stream + '||R{SSM}|')
+                        li.setProperty('inputstream.adaptive.license_key', lic['dt3']+'|User-Agent='+ quote_plus(UA)+'&Origin=https://www.viki.com&Referer=https://www.viki.com|R{SSM}|')
                         #li.setProperty('inputstream.adaptive.stream_headers', 'User-Agent='+ quote_plus(UA)+'&Origin=https://www.viki.com&Referer=https://www.viki.com&verifypeer=false')
 
                     else:
@@ -681,11 +595,9 @@ def addDir(name, url,  action, plot, iconimage, code='', meta={}):
                              label2Mask='%P ')
 
 
-
-#TUTAJ NIE TRZEBA NIC ZMIENIAĆ
-
-
-
+#
+#  MODES
+#
 name = params.get("name")
 url = params.get("url")
 iconimage = params.get("iconimage")

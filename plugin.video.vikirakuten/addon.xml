@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
-<addon id="plugin.video.vikirakuten" name="VIKI Rakuten®" version="0.0.0.4" provider-name="Lantash">
+<addon id="plugin.video.vikirakuten" name="VIKI Rakuten®" version="0.0.0.5" provider-name="Lantash">
   <requires>
 	<import addon="xbmc.python" version="3.0.0"/>
 	<import addon="inputstream.adaptive" version="2.1.0"/>
@@ -25,6 +25,9 @@
   	<website>https://www.viki.com</website>
   	<news>
 		Changelog
+		0.0.0.5
+		Disconnected from youtube-dl
+		Independent API
 		0.0.0.4
 		wyszukiwanie i lista wyszukiwania
 		czyszczenie listy
