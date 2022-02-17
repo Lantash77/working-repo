@@ -1,8 +1,14 @@
 # XBMC Media Center language file
-# Addon Name: VIKI®
-# Addon id: plugin.video.vikir
+# Addon Name: VIKI Rakuten®
+# Addon id: plugin.video.vikirakuten
 # Addon version: 0.19.4.9
 # Addon Provider: Majide
+# strings 30000 thru 30999 reserved for plugins and plugin settings
+# strings 31000 thru 31999 reserved for skins
+# strings 32000 thru 32999 reserved for scripts
+# strings 33000 thru 33999 reserved for common strings used in add-ons
+# Translators:
+
 msgid ""
 msgstr ""
 "Project-Id-Version: XBMC-Addons\n"

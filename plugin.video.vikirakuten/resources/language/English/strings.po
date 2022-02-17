@@ -1,8 +1,14 @@
 # XBMC Media Center language file
 # Addon Name: VIKI Rakuten®
 # Addon id: plugin.video.vikirakuten
-# Addon version: 0.19.4.9
-# Addon Provider: Majide
+# Addon version: 0.0.0.5
+# Addon Provider: Lantash
+# strings 30000 thru 30999 reserved for plugins and plugin settings
+# strings 31000 thru 31999 reserved for skins
+# strings 32000 thru 32999 reserved for scripts
+# strings 33000 thru 33999 reserved for common strings used in add-ons
+# Translators:
+
 msgid ""
 msgstr ""
 "Project-Id-Version: XBMC-Addons\n"
@@ -493,10 +499,15 @@ msgctxt "#115"
 msgid "粵語"
 msgstr ""
 
-#empty strings from id 116 to 30201
+#empty strings from id 116 to 30200
+#Settings section
+
+msgctxt "#30200"
+msgid "PREFERENCES"
+msgstr ""
 
 msgctxt "#30202"
-msgid "Please switch OFF DEBUG Mode !"
+msgid "Subtitles"
 msgstr ""
 
 #empty string with id 30203
@@ -507,12 +518,6 @@ msgstr ""
 
 msgctxt "#30205"
 msgid "Select preferred video quality"
-msgstr ""
-
-#empty strings from id 30206 to 30217
-
-msgctxt "#30218"
-msgid "PREFERENCES"
 msgstr ""
 
 #empty strings from id 30219 to 30303
@@ -537,6 +542,8 @@ msgstr ""
 
 #empty strings from id 30406 to 31020
 
+#: 
+
 msgctxt "#31021"
 msgid "descending"
 msgstr ""
@@ -545,22 +552,48 @@ msgctxt "#31022"
 msgid "ascending"
 msgstr ""
 
-#empty strings from id 31023 to 32020
+#empty strings from id 31023 to 33010
 
-msgctxt "#32021"
+msgctxt "#31023"
 msgid "MP4 360p"
 msgstr ""
 
-msgctxt "#32022"
+msgctxt "#31024"
 msgid "MP4 480p"
 msgstr ""
 
-msgctxt "#32023"
+msgctxt "#31025"
 msgid "MPEG-DASH 480p"
 msgstr ""
 
-msgctxt "#32024"
+msgctxt "#31026"
 msgid "MPEG-DASH MOBILE"
+msgstr ""
+
+#: addon strings
+
+msgctxt "#32000"
+msgid "Search in VIKI® Database"
+msgstr ""
+
+msgctxt "#32001"
+msgid "Go to main menu..."
+msgstr ""
+
+msgctxt "#32002"
+msgid "Enter video ID ...videos/xxxxxxv only"
+msgstr ""
+
+msgctxt "#32003"
+msgid "VIKI Rakuren®"
+msgstr ""
+
+msgctxt "#32004"
+msgid "'Subtitles not available or disabled'"
+msgstr ""
+
+msgctxt "#32005"
+msgid "Error in providing Subtitles"
 msgstr ""
 
 msgctxt "#32025"
@@ -571,24 +604,86 @@ msgctxt "#32026"
 msgid "HD 1080p"
 msgstr ""
 
-#empty strings from id 31026 to 32603
-
 msgctxt "#32056"
 msgid "Are you sure?"
 msgstr ""
- 
+
 msgctxt "#32057"
 msgid "Process Complete"
 msgstr ""
- 
-msgctxt "#32603"
-msgid "New search..."
+
+msgctxt "#32100"
+msgid "Search"
 msgstr ""
- 
-msgctxt "#32604"
-msgid "Clear search history..."
+
+msgctxt "#32102"
+msgid "Play video by ID"
 msgstr ""
- 
-msgctxt "#32605"
-msgid "Click to clear search history"
+
+msgctxt "#32103"
+msgid "[B]New search...[/B]"
+msgstr ""
+
+msgctxt "#32104"
+msgid ""
+msgstr ""
+
+msgctxt "#32105"
+msgid "Movies by Genre"
+msgstr ""
+
+msgctxt "#32107"
+msgid "Browse Movies by Country"
+msgstr ""
+
+msgctxt "#32108"
+msgid "New Movies"
+msgstr ""
+
+msgctxt "#32109"
+msgid "Popular Movies"
+msgstr ""
+
+msgctxt "#32110"
+msgid "Best Movies"
+msgstr ""
+
+msgctxt "#32111"
+msgid "Recent Movies"
+msgstr ""
+
+msgctxt "#32112"
+msgid "Browse Series by Genre"
+msgstr ""
+
+msgctxt "#32113"
+msgid "Browse Series by Country"
+msgstr ""
+
+msgctxt "#32114"
+msgid "New Series"
+msgstr ""
+
+msgctxt "#32115"
+msgid "Popular Series"
+msgstr ""
+
+msgctxt "#32116"
+msgid "Best Series"
+msgstr ""
+
+msgctxt "#32117"
+msgid "Recent Series"
+msgstr ""
+
+msgctxt "#32118"
+msgid "Latest Clips"
+msgstr ""
+
+msgctxt "#32119"
+msgid "[I]Click to clear search history[/I]"
+msgstr ""
+
+msgctxt "#32120"
+msgid "[I]Next page >>[/I]"
 msgstr ""

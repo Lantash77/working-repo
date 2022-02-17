@@ -12,7 +12,6 @@ import xbmcvfs
 
 
 my_addon = xbmcaddon.Addon()
-translang = my_addon.getLocalizedString
 my_addon_id = my_addon.getAddonInfo('id')
 my_addon_name = my_addon.getAddonInfo("name")
 DATA_PATH = xbmcvfs.translatePath(my_addon.getAddonInfo("profile"))# or 'D:\drop'
@@ -21,7 +20,7 @@ MEDIA_PATH = xbmcvfs.translatePath(ADDON_PATH + "resources/media/")
 addonIcon = xbmcvfs.translatePath(ADDON_PATH + "resources/")+ 'icon.png'
 searchFile = os.path.join(DATA_PATH, "search.db")
 srtsubs_path = xbmcvfs.translatePath('special://temp/vikirakuten.English.srt')
-
+L = my_addon.getLocalizedString
 dialog = xbmcgui.Dialog()
 
 def idle():
@@ -41,13 +40,13 @@ def metadataClean(metadata):
 
 def clearCacheSearch(self):
     idle()
-    yes = yesnoDialog(translang(32056).encode("utf-8"), "", "")#"Jesteś pewien?"
+    yes = yesnoDialog(L(32056), "", "")#"Jesteś pewien?"
     if not yes:
         return
     from resources.libs import cache
 
     cache.cache_clear_search()
-    infoDialog(translang(32057).encode("utf-8"), sound=True, icon="INFO")
+    infoDialog(L(32057), sound=True, icon="INFO")
 
 def infoDialog(message, heading=my_addon_name, icon="", time=3000, sound=False):
     if icon == "":

@@ -1,8 +1,14 @@
 # XBMC Media Center language file
 # Addon Name: VIKI Rakuten®
 # Addon id: plugin.video.vikirakuten
-# Addon version: 0.19.4.9
-# Addon Provider: Majide
+# Addon version: 0.0.0.5
+# Addon Provider: Lantash
+# strings 30000 thru 30999 reserved for plugins and plugin settings
+# strings 31000 thru 31999 reserved for skins
+# strings 32000 thru 32999 reserved for scripts
+# strings 33000 thru 33999 reserved for common strings used in add-ons
+# Translators:
+
 msgid ""
 msgstr ""
 "Project-Id-Version: XBMC-Addons\n"
@@ -493,11 +499,16 @@ msgctxt "#115"
 msgid "粵語"
 msgstr ""
 
-#empty strings from id 116 to 30201
+#empty strings from id 116 to 30200
+#Settings section
+
+msgctxt "#30200"
+msgid "PREFERENCES"
+msgstr "USTAWIENIA"
 
 msgctxt "#30202"
-msgid "Please switch OFF DEBUG Mode !"
-msgstr ""
+msgid "Subtitles"
+msgstr "Napisy"
 
 #empty string with id 30203
 
@@ -507,13 +518,7 @@ msgstr "Kolejność odcinków"
 
 msgctxt "#30205"
 msgid "Select preferred video quality"
-msgstr ""
-
-#empty strings from id 30206 to 30217
-
-msgctxt "#30218"
-msgid "PREFERENCES"
-msgstr "Ustawienia"
+msgstr "Jakość Video"
 
 #empty strings from id 30219 to 30303
 
@@ -538,9 +543,6 @@ msgstr ""
 #empty strings from id 30406 to 31020
 
 #: 
-msgctxt "#32010"
-msgid "Search"
-msgstr "Szukaj"
 
 msgctxt "#31021"
 msgid "descending"
@@ -550,23 +552,49 @@ msgctxt "#31022"
 msgid "ascending"
 msgstr "rosnąco"
 
-#empty strings from id 31023 to 32020
+#empty strings from id 31023 to 33010
 
-msgctxt "#32021"
+msgctxt "#31023"
 msgid "MP4 360p"
 msgstr "MP4 360p"
 
-msgctxt "#32022"
+msgctxt "#31024"
 msgid "MP4 480p"
 msgstr "MP4 480p"
 
-msgctxt "#32023"
+msgctxt "#31025"
 msgid "MPEG-DASH 480p"
 msgstr "MPEG-DASH 480p"
 
-msgctxt "#32024"
+msgctxt "#31026"
 msgid "MPEG-DASH MOBILE"
-msgstr ""
+msgstr "MPEG-DASH MOBILE"
+
+#: addon strings
+
+msgctxt "#32000"
+msgid "Search in VIKI® Database"
+msgstr "Wyszukaj w bazie VIKI®"
+
+msgctxt "#32001"
+msgid "Go to main menu..."
+msgstr "Wróć do głównego menu"
+
+msgctxt "#32002"
+msgid "Enter video ID ...videos/xxxxxxv only"
+msgstr "Wprowadź ID video ... w formacie xxxxxxxv"
+
+msgctxt "#32003"
+msgid "VIKI Rakuren®"
+msgstr "VIKI Rakuren®"
+
+msgctxt "#32004"
+msgid "'Subtitles not available or disabled'"
+msgstr "Napisy niedostępne lub wyłączone"
+
+msgctxt "#32005"
+msgid "Error in providing Subtitles"
+msgstr "Błąd pobierania napisów"
 
 msgctxt "#32025"
 msgid "HD 720p"
@@ -576,24 +604,86 @@ msgctxt "#32026"
 msgid "HD 1080p"
 msgstr "HD 1080p"
 
-#empty strings from id 31026 to 32603
- 
 msgctxt "#32056"
 msgid "Are you sure?"
 msgstr "Jesteś pewien?"
- 
+
 msgctxt "#32057"
 msgid "Process Complete"
 msgstr "Proces Ukończony"
+
+msgctxt "#32100"
+msgid "Search"
+msgstr "Wyszukiwanie"
+
+msgctxt "#32102"
+msgid "Play video by ID"
+msgstr "Wprowadź ID filmu"
+
+msgctxt "#32103"
+msgid "[B]New search...[/B]"
+msgstr "[B]Nowe wyszukiwanie...[/B]"
  
-msgctxt "#32603"
-msgid "New search..."
-msgstr "Nowe szukanie..."
- 
-msgctxt "#32604"
-msgid "Clear search history..."
-msgstr "Wyczyść historię wyszukiwania..."
- 
-msgctxt "#32605"
-msgid "Click to clear search history"
-msgstr "Naciśnij aby wyczyścić historię"
+msgctxt "#32104"
+msgid ""
+msgstr ""
+
+msgctxt "#32105"
+msgid "Movies by Genre"
+msgstr "Filmy Kategorie"
+
+msgctxt "#32107"
+msgid "Browse Movies by Country"
+msgstr "Filmy wg Krajów"
+
+msgctxt "#32108"
+msgid "New Movies"
+msgstr "Nowe Filmy"
+
+msgctxt "#32109"
+msgid "Popular Movies"
+msgstr "Popularne Filmy"
+
+msgctxt "#32110"
+msgid "Best Movies"
+msgstr "Najlepsze Filmy"
+
+msgctxt "#32111"
+msgid "Recent Movies"
+msgstr "Najczęściej Oglądane Filmy"
+
+msgctxt "#32112"
+msgid "Browse Series by Genre"
+msgstr "Seriale Kategorie"
+
+msgctxt "#32113"
+msgid "Browse Series by Country"
+msgstr "Seriale wg Kraju"
+
+msgctxt "#32114"
+msgid "New Series"
+msgstr "Nowe Seriale"
+
+msgctxt "#32115"
+msgid "Popular Series"
+msgstr "Popularne Seriale"
+
+msgctxt "#32116"
+msgid "Best Series"
+msgstr "Najlepsze Seriale"
+
+msgctxt "#32117"
+msgid "Recent Series"
+msgstr "Najczęściej Oglądane Seriale"
+
+msgctxt "#32118"
+msgid "Latest Clips"
+msgstr "Najnowsze Klipy"
+
+msgctxt "#32119"
+msgid "[I]Click to clear search history[/I]"
+msgstr "[I]Naciśnij aby wyczyścić historię[/I]"
+
+msgctxt "#32120"
+msgid "[I]Next page >>[/I]"
+msgstr "[I]następna strona >>[/I]"

@@ -6,12 +6,13 @@
 """
 import xbmcaddon
 
+
 my_addon = xbmcaddon.Addon()
 my_addon_id = my_addon.getAddonInfo('id')
 getSetting = my_addon.getSetting
 setSetting = my_addon.setSetting
 sublang = getSetting('lang')
-
+L = my_addon.getLocalizedString
 
 
 if sublang == '0':

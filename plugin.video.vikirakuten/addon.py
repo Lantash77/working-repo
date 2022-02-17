@@ -12,12 +12,9 @@ import json
 from urllib.parse import parse_qsl, quote_plus, urlparse, urlunparse, parse_qs, urlencode
 import urllib.request, urllib.error
 from urllib.error import URLError, HTTPError
-from resources.libs import lang_sel
+from resources.libs import lang_sel, common, viki
 import requests
-from hashlib import sha1
-import hmac
-import binascii
-import base64
+
 import xbmc
 import xbmcgui
 import xbmcplugin
@@ -25,17 +22,14 @@ import xbmcaddon
 import xbmcgui
 import xbmcvfs
 import inputstreamhelper
-import YDStreamExtractor
+#import YDStreamExtractor
 
-
-from resources.libs import common
-from resources.libs import utils, viki
 
 #sys.path.append("C:\Program Files\JetBrains\PyCharm 2021.3\debug-eggs\pydevd-pycharm.egg")
 #import pydevd_pycharm
 #pydevd_pycharm.settrace('localhost', port=5678, stdoutToServer=True, stderrToServer=True)
 
-__settings__ = lang_sel.getSetting
+GetSetting = lang_sel.getSetting
 my_addon = common.my_addon
 my_addon_id = common.my_addon_id
 ADDON_PATH = common.ADDON_PATH
@@ -50,48 +44,47 @@ headmobile = {'user-agent': MUA}
 SEARCH_URL = 'https://api.viki.io/v4/search.json?page=1&per_page=50&app=100000a&term='
 BASE_MOVIE_URL = 'https://api.viki.io/v4/movies.json?%s'
 BASE_SERIES_URL = 'https://api.viki.io/v4/series.json?%s'
-system_lang = xbmc.getLanguage()
+system_lang = xbmc.getLanguage(0, region=True)
 params = dict(parse_qsl(sys.argv[2].replace("?", "")))
-
+L = lang_sel.L
 VikiAPI = viki.VikiAPI()
 
 #Dostosuj jakość wideo
-quality =__settings__('quality')
+#quality =GetSetting('quality')
 
 #Wsparcie dla kanału fanów
-fc =__settings__('fc')
+#fc =GetSetting('fc')
 
 #Tryb debugowania
-debug =__settings__('debug')
+#debug =GetSetting('debug')
 
 #Ustaw kolejność odcinków
-d =__settings__('direction')
+d =GetSetting('direction')
 if d == '0': order = '&direction=desc'
 elif d == '1': order = '&direction=asc'
 
 #Ustaw język napisów
-se = __settings__('se')
+se = GetSetting('se')
 lang = lang_sel.lang
 language = lang_sel.language
 
 
 #Menu z katalogami we wtyczce
 def CATEGORIES():
-    addDir('Search','','search','',md+'DefaultAddonsSearch.png') #Search32010
-
-    addDir('Browse Movies by Genre','movies','genre','',md+'DefaultFolder.png')
-    addDir('Browse Movies by Country','movies','','country',md+'DefaultFolder.png')
-    addDir('New Movies', BASE_MOVIE_URL % 'sort=newest_video&page=1&per_page=50&app=100000a&t=','index','',md+'DefaultFolder.png')
-    addDir('Recent Movies',BASE_MOVIE_URL % 'sort=views_recent&page=1&per_page=50&app=100000a&t=','index','',md+'DefaultFolder.png')
-    addDir('Popular Movies',BASE_MOVIE_URL % 'sort=trending&page=1&per_page=50&app=100000a&t=','index','',md+'DefaultFolder.png')
-    addDir('Best Movies',BASE_MOVIE_URL % 'sort=views&page=1&per_page=50&app=100000a&t=','index','',md+'DefaultFolder.png')
-    addDir('Browse Series by Genre','series','genre','',md+'DefaultFolder.png')
-    addDir('Browse Series by Country','series','country','',md+'DefaultFolder.png')
-    addDir('New Series',BASE_SERIES_URL % 'sort=newest_video&page=1&per_page=50&app=100000a&t=','index','',md+'DefaultFolder.png')
-    addDir('Recent Series',BASE_SERIES_URL % 'sort=views_recent&page=1&per_page=50&app=100000a&t=','index','',md+'DefaultFolder.png')
-    addDir('Popular Series',BASE_SERIES_URL % 'sort=trending&page=1&per_page=50&app=100000a&t=','index','',md+'DefaultFolder.png')
-    addDir('Best Series',BASE_SERIES_URL % 'sort=views&page=1&per_page=50&app=100000a&t=','index','',md+'DefaultFolder.png')
-    addDir('Latest Clips',BASE_SERIES_URL % 'sort=newest_video&page=1&per_page=50&app=100000a&t=','index','',md+'DefaultFolder.png')
+    addDir(32100, '', 'search', '', md+'DefaultAddonsSearch.png') #Search
+    addDir(32105, 'movies', 'genre', '', md+'DefaultFolder.png')
+    addDir(32107, 'movies', '', 'country', md+'DefaultFolder.png')
+    addDir(32108, BASE_MOVIE_URL % 'sort=newest_video&page=1&per_page=50&app=100000a&t=', 'index', '', md+'DefaultFolder.png')
+    addDir(32109, BASE_MOVIE_URL % 'sort=trending&page=1&per_page=50&app=100000a&t=', 'index', '', md+'DefaultFolder.png')
+    addDir(32110, BASE_MOVIE_URL % 'sort=views&page=1&per_page=50&app=100000a&t=', 'index', '', md+'DefaultFolder.png')
+    addDir(32111, BASE_MOVIE_URL % 'sort=views_recent&page=1&per_page=50&app=100000a&t=', 'index', '',md+'DefaultFolder.png')
+    addDir(32112, 'series', 'genre', '', md+'DefaultFolder.png')
+    addDir(32113, 'series', 'country', '', md+'DefaultFolder.png')
+    addDir(32114, BASE_SERIES_URL % 'sort=newest_video&page=1&per_page=50&app=100000a&t=', 'index', '', md+'DefaultFolder.png')
+    addDir(32115, BASE_SERIES_URL % 'sort=trending&page=1&per_page=50&app=100000a&t=', 'index', '', md+'DefaultFolder.png')
+    addDir(32116, BASE_SERIES_URL % 'sort=views&page=1&per_page=50&app=100000a&t=', 'index', '', md+'DefaultFolder.png')
+    addDir(32117, BASE_SERIES_URL % 'sort=views_recent&page=1&per_page=50&app=100000a&t=', 'index', '', md+'DefaultFolder.png')
+    addDir(32118, BASE_SERIES_URL % 'sort=newest_video&page=1&per_page=50&app=100000a&t=', 'index', '', md+'DefaultFolder.png')
 
 #Przewiń tytuły przesłanej strony
 def INDEX(url):
@@ -112,7 +105,7 @@ def INDEX(url):
         for movie in range(0, len(jsonrsp['response'])):
                 data = jsonrsp['response'][movie]
             # Jeśli tytuł jest licencjonowany lub włączony jest tryb Fan Channels / Debug
-                if (data['flags']['licensed'] == True or fc == 'true' or debug == 'true'):
+                if (data['flags']['licensed'] == True):
                     if data['type'] == 'series': #Jeśli to seria
                         try: #Tytuł w języku angielskim
                             mt = str(data['titles']['en'])
@@ -211,7 +204,7 @@ def INDEX(url):
         fronturl, page, backurl = re.findall('(.+?)&page=(.+?)&per_page=(.+?)&t=', url)[0]
         newpage = int(page) + 1
         url = fronturl + '&page=' + str(newpage) + '&per_page=' + backurl + '&t='
-        addDir('Next page >>', url, 'index', '', md + 'DefaultFolder.png')
+        addDir(32120, url, 'index', '', md + 'DefaultFolder.png')
 
 #Przeglądanie odcinków serialu
 def PREPARE(url):
@@ -292,7 +285,7 @@ def PREPARE(url):
             newpage = int(page)+1
             url = fronturl + 'page=' + str(newpage) + '&per_page=50&app=100000a&t=' + timestamp
             #print 'URL OF THE NEXT PAGE IS' + url
-            addDir('Next page >>', url, 'prepare', '', md+'DefaultFolder.png')
+            addDir(32120, url, 'prepare', '', md+'DefaultFolder.png')
 
 #Gatunki
 def GENRE(url):
@@ -320,8 +313,8 @@ def COUNTRY(url):
 
 def SEARCH():
 
-    addDir("[B]New search...[/B]", '', "movieSearchnew", '', md+'DefaultAddonsSearch.png')#"New search..."32603
-    addLink('Play video by ID', 'loadbyid', '0', 'True', '', '', 'G', '5.0', 'loadID', md + 'DefaultStudios.png')
+    addDir(32103, '', "movieSearchnew", '', md+'DefaultAddonsSearch.png') #"[B]New search...[/B]
+    #addLink(32102, 'loadbyid', '0', 'True', '', '', 'G', '5.0', 'loadID', md + 'DefaultStudios.png')
 
     from sqlite3 import dbapi2 as database
 
@@ -337,17 +330,19 @@ def SEARCH():
 
     dbcur.execute("SELECT * FROM movies ORDER BY ID DESC")
     lst = []
-
     delete_option = False
-    for (id, term) in dbcur.fetchall():
-        if term not in str(lst):
-            delete_option = True
-            addDir(term, "", "movieSearchterm&name=%s" % term, "", md+'DefaultAddonsSearch.png')
-            lst += [(term)]
+    try:
+        for (id, term) in dbcur.fetchall():
+            if term not in str(lst):
+                delete_option = True
+                addDir(term, "", "movieSearchterm&name=%s" % term, "", md+'DefaultAddonsSearch.png')
+                lst += [(term)]
+    except:
+        pass
     dbcur.close()
 
     if delete_option:
-        addDir("[I]Click to clear search history[/I]", '', "clearCacheSearch", '', md+'DefaultAddonsSearch.png') #"Naciśnij aby wyczyścić historię"#32605
+        addDir(32119, '', "clearCacheSearch", '', md+'DefaultAddonsSearch.png') #"Naciśnij aby wyczyścić historię"#
 
 
 def search_new(url):
@@ -355,11 +350,11 @@ def search_new(url):
 #	t = control.lang(32010).encode("utf-8")
 #	k = control.keyboard("", t)
     xbmcplugin.setContent(int(sys.argv[1]), 'season')
-    k = xbmc.Keyboard('', 'Search in VIKI® Database')
+    k = xbmc.Keyboard('', L(32000))
     k.doModal()
     q = k.getText() if k.isConfirmed() else None
     if q == None or q == "":
-        addDir('Go to main menu...', '', '', '', md+'DefaultFolderBack.png')
+        addDir(32001, '', '', '', md+'DefaultFolderBack.png')
 #	q = cleantitle.normalize(q)  # for polish characters
 #	control.busy()
 
@@ -392,14 +387,20 @@ def clear_search():
 
 #Załaduj klip według ID
 def LOADBYID():
-        keyb = xbmc.Keyboard('', 'Enter video ID ...videos/xxxxxxv only')
-        keyb.doModal()
-        if (keyb.isConfirmed()):
-            vid = quote_plus(keyb.getText())
-            #print 'LOADBYID:' + vid
-            PLAY('VIKI®', vid+'@0@50', md+'DefaultStudios.png')
-        else:
-            addDir('Go to main menu...', '', '', '', md+'DefaultFolderBack.png')
+
+    dialog = xbmcgui.Dialog()
+
+    vid = dialog.numeric(0, L(32002))
+    if vid != '':
+        PLAY('VIKI®', vid+'v@0@50', md+'DefaultStudios.png')
+    #keyb = xbmc.Keyboard('', L(32002))
+    #keyb.doModal()
+    #if (keyb.isConfirmed()):
+    #    vid = quote_plus(keyb.getText())
+    #    #print 'LOADBYID:' + vid
+    #    PLAY('VIKI®', vid+'@0@50', md+'DefaultStudios.png')
+    else:
+        addDir(32001, '', '', '', md+'DefaultFolderBack.png')
 
 def PLAY(name,url,iconimage):
 
@@ -428,26 +429,25 @@ def PLAY(name,url,iconimage):
                 sub = 'true'
             else:
                 sub = 'false' #Jeśli nie są dostępne napisy
-                xbmc.executebuiltin('Notification(%s, %s, %d, %s)'%('VIKI®','Subtitles not available or disabled', 4000, md+'DefaultAddonSubtitles.png'))
+                xbmc.executebuiltin('Notification(%s, %s, %d, %s)'% (L(32003), L(32004), 4000, md+'DefaultAddonSubtitles.png'))
         except:
             sub = 'false' #Jeśli wystąpił błąd w odbiorze napisów
-            xbmc.executebuiltin('Notification(%s, %s, %d, %s)'%('VIKI®','Error in providing Subtitles', 4000, md+'DefaultIconError.png'))
+            xbmc.executebuiltin('Notification(%s, %s, %d, %s)'% (L(32003), L(32005), 4000, md+'DefaultIconError.png'))
 
         rapi = 'true'
         #Prośba o otrzymanie strumienia wideo z API
-        if (debug == 'false' and rapi == 'true'):
+        if (rapi == 'true'):
             try:
 
                 ## youtube-dl
-                web = 'https://www.viki.com/videos/' + url + '-viki-link'
-                vid = YDStreamExtractor.getVideoInfo(web,quality=1) #quality is 0=SD, 1=720p, 2=1080p and is a maximum
-                test = vid._streams
+                #web = 'https://www.viki.com/videos/' + url + '-viki-link'
+                #vid = YDStreamExtractor.getVideoInfo(web,quality=1) #quality is 0=SD, 1=720p, 2=1080p and is a maximum
+                #test = vid._streams
 
                 ## Independent API
                 manifest, lic = VikiAPI.get_stream(video_id)
 
-
-                stream = manifest[1]
+                stream = manifest[0]
 
 
             except HTTPError as e:
@@ -517,6 +517,9 @@ def PLAY(name,url,iconimage):
 #Moduł do dodawania osobnego tytułu i jego atrybutów do zawartości katalogu wyświetlanego w Kodi - TUTAJ NIE TRZEBA ZMIENIAĆ
 def addLink(name,url,vd,hd,plot,author,rating,ar,action,iconimage,meta={}):
 
+    if isinstance(name, int):
+        name = L(name)
+
     trans = ''
     try:
         trans = language + ' ' + url.split('@')[2] + '%'
@@ -526,6 +529,7 @@ def addLink(name,url,vd,hd,plot,author,rating,ar,action,iconimage,meta={}):
 #		name = control.lang(name).encode("utf-8")
 #	except:
     u = sys.argv[0]+"?url="+ quote_plus(url)+"&action="+str(action)+"&name="+ quote_plus(name)
+
     liz = xbmcgui.ListItem(name)
     liz.setArt({'thumb': iconimage, 'poster': iconimage, 'banner': iconimage, 'fanart': iconimage, 'icon': iconimage})
     info = {
@@ -568,7 +572,8 @@ def addLink(name,url,vd,hd,plot,author,rating,ar,action,iconimage,meta={}):
 
 #    Moduł dodawania osobnego katalogu i jego atrybutów do zawartości katalogu wyświetlanego w Kodi - TUTAJ NIE TRZEBA ZMIENIAĆ
 def addDir(name, url,  action, plot, iconimage, code='', meta={}):
-
+    if isinstance(name, int):
+        name = L(name)
     if code:
         code = language + ' ' + code + '%'
 
