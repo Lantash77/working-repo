@@ -59,23 +59,20 @@ class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
         
         if 'tqdrama=' in path:
             hdk = addon.getSetting('hdk')
-            hda = addon.getSetting('hda')
-            hda2 = dict(parse_qsl(hda))
-            urla = addon.getSetting('urla')
-                
+            ping = addon.getSetting('ping')
             hdk2 = dict(parse_qsl(hdk))
             licurl = self.parseUrl('tqdrama=')
 
             if 'video.drm' in (self.path):
-                sess = requests.session()
-                r = sess.get(url=urla, headers=hda2)
-                result1 = sess.get(url=licurl, headers=hdk2, verify=False, timeout=30).text
- #test          result1 = requests.get(url=licurl, headers=hdk2, verify=False, timeout=30).text
-
+                result1 = requests.get(url=licurl, headers=hdk2, verify=False, timeout = 30).text
+                ping = requests.get(ping)
+                print('#################  HTTP YOŁ LIC URL' + licurl)
                 #uri,sequence = re.findall('\,URI="(.+?)",IV\=0x(.+?)\\n',result1,re.DOTALL)[0]
                 
                 #reg = '('+uri+')'#,'',
-                result = re.sub('(".*?drmkey\?v=\d+")', '"https://github.com/Lantash77/lantash-repo/raw/main/dk"', result1)
+                #result = re.sub('(".*?drmkey\?v=\d+")', '"https://github.com/Lantash77/lantash-repo/raw/main/dk"', result1)
+                result = result1
+
 
                 self.send_response(200)
                 

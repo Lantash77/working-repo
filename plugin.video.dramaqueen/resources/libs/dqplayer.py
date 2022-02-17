@@ -38,7 +38,9 @@ def fetch(url):
 
     # hls
     strmUrl = base_url + id + '/' + res
+    ping = activate_url.replace('activate', 'ping')
+    print('############' + ping)
 
-    return strmUrl, headers_src, activate_url, headers_activate
+    return strmUrl, headers_src, ping
 
 
