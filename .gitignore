@@ -4,3 +4,4 @@ _repo_xml_generator_p3.py
 
 # Dirs
 __pycache__/
+.idea/
