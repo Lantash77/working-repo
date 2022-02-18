@@ -530,6 +530,18 @@ msgctxt "#30305"
 msgid "Choose preffered subtitle language"
 msgstr ""
 
+msgctxt "#30306"
+msgid "InputStream Adaptive settings..."
+msgstr ""
+
+msgctxt "#30307"
+msgid "InputStream Helper settings..."
+msgstr ""
+
+msgctxt "#30308"
+msgid "External addons settings..."
+msgstr ""
+
 #empty strings from id 30306 to 30403
 
 msgctxt "#30404"
@@ -686,4 +698,12 @@ msgstr ""
 
 msgctxt "#32120"
 msgid "[I]Next page >>[/I]"
+msgstr ""
+
+msgctxt "#32121"
+msgid " Episode "
+msgstr ""
+
+msgctxt "#32122"
+msgid "There are no episodes for now"
 msgstr ""

@@ -10,7 +10,6 @@ import os
 import time
 import json
 from urllib.parse import parse_qsl, quote_plus, urlparse, urlunparse, parse_qs, urlencode
-import urllib.request, urllib.error
 from urllib.error import URLError, HTTPError
 from resources.libs import lang_sel, common, viki
 import requests
@@ -147,7 +146,7 @@ def INDEX(url):
                         addDir(mt,'https://api.viki.io/v4/series/'+data['id']+'/episodes.json?page=1&per_page=50&app=100000a&t='+timestamp,'prepare',mdes,pos,code=subs_local)
 
                     else: #Jeśli jest to film fabularny lub wideo
-                        if (data['blocked'] == False or debug == 'true'): #Проверка за достъпност
+                        if (data['blocked'] == False): #Проверка за достъпност
                             try: #Napisy lokalne
                                 subs_local = str(data['subtitle_completions'][lang])
                             except:
@@ -219,13 +218,13 @@ def PREPARE(url):
     for episode in range(0, len(jsonrsp['response'])):
         data = jsonrsp['response'][episode]
         try:
-            if (data['blocked'] == False or debug == 'true'): #Kontrola dostępności — zablokowana lub nie
+            if (data['blocked'] == False): #Kontrola dostępności — zablokowana lub nie
                 try: #Nazwa serii
                     tsn = str(data['container']['titles']['en'])
                 except:
                     tsn = ''
                 try: #Numer odcinka serialu
-                    ep = ' Episode ' + str(data['number'])
+                    ep = L(32121) + str(data['number'])
                 except:
                     ep = ''
                 try: #Identyfikator odcinka
@@ -275,7 +274,7 @@ def PREPARE(url):
         except:
             xbmc.executebuiltin('Notification(%s, %s, %d, %s)'%('VIKI®','Error in PREPARE Function', 4000, md+'DefaultIconError.png'))
     if len(jsonrsp['response'])==0:
-        addDir('There are no episodes for now','','','',md+'DefaultFolderBack.png')
+        addDir(32122, '', '', '', md+'DefaultFolderBack.png')
     #Koniec indeksowania
 
     #Next page...
@@ -298,7 +297,6 @@ def GENRE(url):
 
     for genre in range(0, len(jsonrsp)):
         addDir(jsonrsp[genre]['name']['en'], 'https://api.viki.io/v4/'+url+'.json?sort=newest_video&page=1&per_page=50&app=100000a&genre='+jsonrsp[genre]['id']+'&t=', 'index', '', md+'DefaultFolder.png')
-
 
 #Kraj
 def COUNTRY(url):
@@ -342,21 +340,17 @@ def SEARCH():
     dbcur.close()
 
     if delete_option:
-        addDir(32119, '', "clearCacheSearch", '', md+'DefaultAddonsSearch.png') #"Naciśnij aby wyczyścić historię"#
+        addDir(32119, '', "clearCacheSearch", '', md+'DefaultAddonsSearch.png')
 
 
 def search_new(url):
-#	control.idle()
-#	t = control.lang(32010).encode("utf-8")
-#	k = control.keyboard("", t)
+
     xbmcplugin.setContent(int(sys.argv[1]), 'season')
     k = xbmc.Keyboard('', L(32000))
     k.doModal()
     q = k.getText() if k.isConfirmed() else None
-    if q == None or q == "":
+    if q is None or q == "":
         addDir(32001, '', '', '', md+'DefaultFolderBack.png')
-#	q = cleantitle.normalize(q)  # for polish characters
-#	control.busy()
 
     from sqlite3 import dbapi2 as database
 
@@ -385,11 +379,10 @@ def clear_search():
     dbcur.close()
     SEARCH()
 
-#Załaduj klip według ID
+#Załaduj klip według ID - nie działa wywala na napisach
 def LOADBYID():
 
     dialog = xbmcgui.Dialog()
-
     vid = dialog.numeric(0, L(32002))
     if vid != '':
         PLAY('VIKI®', vid+'v@0@50', md+'DefaultStudios.png')
@@ -407,10 +400,9 @@ def PLAY(name,url,iconimage):
         video_id, thumbnail, subtitle_completion1, subtitle_completion2, plot = url.split("@")
 
         #Pobieranie napisów
-
         try:
             if (int(subtitle_completion1)>79 and se=='true'): #Jeśli przetłumaczone ponad 79% napisów w naszym języku
-                srtsubs_path = xbmcvfs.translatePath('special://temp/vikirakuten.'+language+'.srt')
+                srtsubs_path = xbmcvfs.translatePath('special://temp/vikirakuten.' + language +'.srt')
 
                 subs = VikiAPI.get_subs(video_id, lang)
                 f = xbmcvfs.File(srtsubs_path, 'w')
@@ -419,7 +411,6 @@ def PLAY(name,url,iconimage):
                 sub = 'true'
             elif (int(subtitle_completion2)>0 and se=='true'): #Przełączamy się na napisy w języku angielskim
                 srtsubs_path = common.srtsubs_path
-
 
                 subs = VikiAPI.get_subs(video_id, 'en')
                 f = xbmcvfs.File(srtsubs_path, 'w')
@@ -431,29 +422,25 @@ def PLAY(name,url,iconimage):
                 sub = 'false' #Jeśli nie są dostępne napisy
                 xbmc.executebuiltin('Notification(%s, %s, %d, %s)'% (L(32003), L(32004), 4000, md+'DefaultAddonSubtitles.png'))
         except:
-            sub = 'false' #Jeśli wystąpił błąd w odbiorze napisów
+            sub = 'false' #Jeśli wystąpił błąd w pobieraniu napisów
             xbmc.executebuiltin('Notification(%s, %s, %d, %s)'% (L(32003), L(32005), 4000, md+'DefaultIconError.png'))
+        try:
 
-        rapi = 'true'
-        #Prośba o otrzymanie strumienia wideo z API
-        if (rapi == 'true'):
-            try:
+            ## youtube-dl
+            #web = 'https://www.viki.com/videos/' + url + '-viki-link'
+            #vid = YDStreamExtractor.getVideoInfo(web,quality=1) #quality is 0=SD, 1=720p, 2=1080p and is a maximum
+            #test = vid._streams
 
-                ## youtube-dl
-                #web = 'https://www.viki.com/videos/' + url + '-viki-link'
-                #vid = YDStreamExtractor.getVideoInfo(web,quality=1) #quality is 0=SD, 1=720p, 2=1080p and is a maximum
-                #test = vid._streams
+            ## Independent API
+            manifest, lic = VikiAPI.get_stream(video_id)
 
-                ## Independent API
-                manifest, lic = VikiAPI.get_stream(video_id)
-
-                stream = manifest[0]
+            stream = manifest[0]
 
 
-            except HTTPError as e:
-                xbmcgui.Dialog().ok('VIKI® Error',str(e.code)+" "+str(e.reason)+"\n"+"That's all we know about this error.")
-            except URLError as e:
-                xbmcgui.Dialog().ok('VIKI® Error',str(e.code)+" "+str(e.reason)+"\n"+"That's all we know about this error.")
+        except HTTPError as e:
+            xbmcgui.Dialog().ok('VIKI® Error',str(e.code)+" "+str(e.reason)+"\n"+"That's all we know about this error.")
+        except URLError as e:
+            xbmcgui.Dialog().ok('VIKI® Error',str(e.code)+" "+str(e.reason)+"\n"+"That's all we know about this error.")
 
         #Ładowanie wideo
         try:
@@ -514,7 +501,7 @@ def PLAY(name,url,iconimage):
         except URLError as e:
             xbmcgui.Dialog().ok('VIKI® Error',str(e.code)+" "+str(e.reason)+"\n"+"That's all we know about this error.")
 
-#Moduł do dodawania osobnego tytułu i jego atrybutów do zawartości katalogu wyświetlanego w Kodi - TUTAJ NIE TRZEBA ZMIENIAĆ
+
 def addLink(name,url,vd,hd,plot,author,rating,ar,action,iconimage,meta={}):
 
     if isinstance(name, int):
@@ -525,9 +512,7 @@ def addLink(name,url,vd,hd,plot,author,rating,ar,action,iconimage,meta={}):
         trans = language + ' ' + url.split('@')[2] + '%'
     except:
         pass
-#	try:
-#		name = control.lang(name).encode("utf-8")
-#	except:
+
     u = sys.argv[0]+"?url="+ quote_plus(url)+"&action="+str(action)+"&name="+ quote_plus(name)
 
     liz = xbmcgui.ListItem(name)
@@ -550,7 +535,6 @@ def addLink(name,url,vd,hd,plot,author,rating,ar,action,iconimage,meta={}):
                                     'codec': 'h264'
                                     }
         )
-
     else:
         liz.addStreamInfo('video', {'width': 720,
                                     'height': 480,
@@ -570,7 +554,7 @@ def addLink(name,url,vd,hd,plot,author,rating,ar,action,iconimage,meta={}):
                              label2Mask='%P '+' %D')
 
 
-#    Moduł dodawania osobnego katalogu i jego atrybutów do zawartości katalogu wyświetlanego w Kodi - TUTAJ NIE TRZEBA ZMIENIAĆ
+
 def addDir(name, url,  action, plot, iconimage, code='', meta={}):
     if isinstance(name, int):
         name = L(name)
@@ -609,7 +593,7 @@ iconimage = params.get("iconimage")
 meta = params.get("meta")
 action = params.get("action")
 
-#Lista poszczególnych podprogramów/modułów w tej wtyczce - musi być w pełni zgodna z powyższym kodem
+
 if action == None:
     CATEGORIES()
 elif action == 'index':

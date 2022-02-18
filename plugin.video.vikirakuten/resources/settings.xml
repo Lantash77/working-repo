@@ -150,6 +150,22 @@
 					<control type="list" format="string"/>
 				</setting>
 			</group>
+			<group id="3" label="30308">
+				<setting id="isa_settings" type="action" label="30306">
+					<level>0</level>
+					<data>Addon.OpenSettings(inputstream.adaptive)</data>
+					<control type="button" format="action">
+						<close>true</close>
+					</control>
+				</setting>
+				<setting id="ish_settings" type="action" label="30307">
+					<level>0</level>
+					<data>Addon.OpenSettings(script.module.inputstreamhelper)</data>
+					<control type="button" format="action">
+						<close>true</close>
+					</control>
+				</setting>
+			</group>
 		</category>
 	</section>
 </settings>

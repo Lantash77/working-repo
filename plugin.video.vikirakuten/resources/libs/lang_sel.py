@@ -215,7 +215,7 @@ elif sublang =='65':
 	language = 'Uzbek'
 elif sublang =='66':
 	lang='pl'
-	language = 'Polish'
+	language = 'Polski'
 elif sublang =='67':
 	lang='ro'
 	language = 'Romanian'

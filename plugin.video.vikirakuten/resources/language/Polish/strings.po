@@ -530,6 +530,18 @@ msgctxt "#30305"
 msgid "Choose preffered subtitle language"
 msgstr "Wybierz język napisów"
 
+msgctxt "#30306"
+msgid "InputStream Adaptive settings..."
+msgstr "Ustawienia wtyczki strumieniowej..."
+
+msgctxt "#30307"
+msgid "InputStream Helper settings..."
+msgstr "Ustawienia InputStream Helper..."
+
+msgctxt "#30308"
+msgid "External addons settings..."
+msgstr "Ustawienia zewnętrznych wtyczek"
+
 #empty strings from id 30306 to 30403
 
 msgctxt "#30404"
@@ -687,3 +699,11 @@ msgstr "[I]Naciśnij aby wyczyścić historię[/I]"
 msgctxt "#32120"
 msgid "[I]Next page >>[/I]"
 msgstr "[I]następna strona >>[/I]"
+
+msgctxt "#32121"
+msgid " Episode "
+msgstr " Odcinek "
+
+msgctxt "#32122"
+msgid "There are no episodes for now"
+msgstr "Aktualnie brak odcinków"
