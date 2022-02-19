@@ -28,67 +28,70 @@ import inputstreamhelper
 #import pydevd_pycharm
 #pydevd_pycharm.settrace('localhost', port=5678, stdoutToServer=True, stderrToServer=True)
 
-GetSetting = lang_sel.getSetting
+
 my_addon = common.my_addon
 my_addon_id = common.my_addon_id
 ADDON_PATH = common.ADDON_PATH
 DATA_PATH = common.DATA_PATH
 MEDIA_PATH = common.MEDIA_PATH
 searchFile = common.searchFile
+GetSetting = my_addon.getSetting
+SetSetting = my_addon.setSetting
 md = MEDIA_PATH
-MUA = 'Mozilla/5.0 (iPhone; CPU iPhone OS 12_0 like Mac OS X) AppleWebKit/ 604.1.21 (KHTML, like Gecko) Version/ 12.0 Mobile/17A6278a Safari/602.1.26'
+MEDIA = {'subtitles': MEDIA_PATH +'DefaultAddonSubtitles.png', 'folder': MEDIA_PATH+'DefaultFolder.png',
+         'search': MEDIA_PATH+'DefaultAddonsSearch.png', 'error': MEDIA_PATH+'DefaultIconError.png',
+         'back': MEDIA_PATH+'DefaultFolderBack.png', 'studio': MEDIA_PATH+'DefaultStudios.png',
+         'locked': MEDIA_PATH+'OverlayLocked.png'}
 UA = 'Mozilla/5.0 (Macintosh; MacOS X10_14_3; rv;93.0) Gecko/20100101 Firefox/93.0'
 header = {'user-agent': UA}
-headmobile = {'user-agent': MUA}
 SEARCH_URL = 'https://api.viki.io/v4/search.json?page=1&per_page=50&app=100000a&term='
 BASE_MOVIE_URL = 'https://api.viki.io/v4/movies.json?%s'
 BASE_SERIES_URL = 'https://api.viki.io/v4/series.json?%s'
-system_lang = xbmc.getLanguage(0, region=True)
+system_lang = xbmc.getLanguage(0, region=True).split('-')[0]
 params = dict(parse_qsl(sys.argv[2].replace("?", "")))
 L = lang_sel.L
 VikiAPI = viki.VikiAPI()
 
-#Dostosuj jakość wideo
-#quality =GetSetting('quality')
+try: lang_code = [i['code'] for i in lang_sel.languagelist if i['lang'] == system_lang][0]
+except : lang_code = '0'
 
-#Wsparcie dla kanału fanów
-#fc =GetSetting('fc')
+t = GetSetting('subs.init')
+if GetSetting('subs.init') == '':
+   SetSetting('lang', lang_code)
+   lang, language = lang_sel.get_lang(lang_code)
 
-#Tryb debugowania
-#debug =GetSetting('debug')
+   common.dialog.notification(L(32003), L(32123) + language, MEDIA['subtitles'], 5000, sound=False)
+   SetSetting('subs.init', 'true')
+else:
+    lang, language = lang_sel.get_lang()
+
 
 #Ustaw kolejność odcinków
 d =GetSetting('direction')
 if d == '0': order = '&direction=desc'
 elif d == '1': order = '&direction=asc'
 
-#Ustaw język napisów
-se = GetSetting('se')
-lang = lang_sel.lang
-language = lang_sel.language
+subs_enabled = GetSetting('subs.enabled')
 
-
-#Menu z katalogami we wtyczce
+#Main menu
 def CATEGORIES():
-    addDir(32100, '', 'search', '', md+'DefaultAddonsSearch.png') #Search
-    addDir(32105, 'movies', 'genre', '', md+'DefaultFolder.png')
-    addDir(32107, 'movies', '', 'country', md+'DefaultFolder.png')
-    addDir(32108, BASE_MOVIE_URL % 'sort=newest_video&page=1&per_page=50&app=100000a&t=', 'index', '', md+'DefaultFolder.png')
-    addDir(32109, BASE_MOVIE_URL % 'sort=trending&page=1&per_page=50&app=100000a&t=', 'index', '', md+'DefaultFolder.png')
-    addDir(32110, BASE_MOVIE_URL % 'sort=views&page=1&per_page=50&app=100000a&t=', 'index', '', md+'DefaultFolder.png')
-    addDir(32111, BASE_MOVIE_URL % 'sort=views_recent&page=1&per_page=50&app=100000a&t=', 'index', '',md+'DefaultFolder.png')
-    addDir(32112, 'series', 'genre', '', md+'DefaultFolder.png')
-    addDir(32113, 'series', 'country', '', md+'DefaultFolder.png')
-    addDir(32114, BASE_SERIES_URL % 'sort=newest_video&page=1&per_page=50&app=100000a&t=', 'index', '', md+'DefaultFolder.png')
-    addDir(32115, BASE_SERIES_URL % 'sort=trending&page=1&per_page=50&app=100000a&t=', 'index', '', md+'DefaultFolder.png')
-    addDir(32116, BASE_SERIES_URL % 'sort=views&page=1&per_page=50&app=100000a&t=', 'index', '', md+'DefaultFolder.png')
-    addDir(32117, BASE_SERIES_URL % 'sort=views_recent&page=1&per_page=50&app=100000a&t=', 'index', '', md+'DefaultFolder.png')
-    addDir(32118, BASE_SERIES_URL % 'sort=newest_video&page=1&per_page=50&app=100000a&t=', 'index', '', md+'DefaultFolder.png')
+    addDir(32100, '', 'search', '', MEDIA['search']) #Search
+    addDir(32105, 'movies', 'genre', '', MEDIA['folder'])
+    addDir(32107, 'movies', '', 'country', MEDIA['folder'])
+    addDir(32108, BASE_MOVIE_URL % 'sort=newest_video&page=1&per_page=50&app=100000a&t=', 'index', '', MEDIA['folder'])
+    addDir(32109, BASE_MOVIE_URL % 'sort=trending&page=1&per_page=50&app=100000a&t=', 'index', '', MEDIA['folder'])
+    addDir(32110, BASE_MOVIE_URL % 'sort=views&page=1&per_page=50&app=100000a&t=', 'index', '', MEDIA['folder'])
+    addDir(32111, BASE_MOVIE_URL % 'sort=views_recent&page=1&per_page=50&app=100000a&t=', 'index', '',MEDIA['folder'])
+    addDir(32112, 'series', 'genre', '', MEDIA['folder'])
+    addDir(32113, 'series', 'country', '', MEDIA['folder'])
+    addDir(32114, BASE_SERIES_URL % 'sort=newest_video&page=1&per_page=50&app=100000a&t=', 'index', '', MEDIA['folder'])
+    addDir(32115, BASE_SERIES_URL % 'sort=trending&page=1&per_page=50&app=100000a&t=', 'index', '', MEDIA['folder'])
+    addDir(32116, BASE_SERIES_URL % 'sort=views&page=1&per_page=50&app=100000a&t=', 'index', '', MEDIA['folder'])
+    addDir(32117, BASE_SERIES_URL % 'sort=views_recent&page=1&per_page=50&app=100000a&t=', 'index', '', MEDIA['folder'])
+    addDir(32118, BASE_SERIES_URL % 'sort=newest_video&page=1&per_page=50&app=100000a&t=', 'index', '', MEDIA['folder'])
 
-#Przewiń tytuły przesłanej strony
 def INDEX(url):
 
-    ################
     timestamp = str(int(time.time()))
 
     try:
@@ -97,19 +100,14 @@ def INDEX(url):
         else:
             jsonrsp = requests.get(url+timestamp, headers=header, timeout=5).json()
 
-
-        print (jsonrsp['response'][0]['titles']['en'])
-
-    #Rozpocznij indeksowanie
         for movie in range(0, len(jsonrsp['response'])):
                 data = jsonrsp['response'][movie]
-            # Jeśli tytuł jest licencjonowany lub włączony jest tryb Fan Channels / Debug
                 if (data['flags']['licensed'] == True):
                     if data['type'] == 'series': #Jeśli to seria
                         try: #Tytuł w języku angielskim
-                            mt = str(data['titles']['en'])
+                            title = str(data['titles']['en'])
                         except:
-                            mt = 'TV Show Title'
+                            title = 'TV Show Title'
                         try: #Opis w języku angielskim
                             mdes = str(data['descriptions']['en'])
                         except:
@@ -134,7 +132,7 @@ def INDEX(url):
                         xbmcplugin.setContent(int(sys.argv[1]), 'season')
 
                         meta = {
-                            'title': mt,
+                            'title': title,
                             'original_title': '',
                             'origin_country': origin_country,
                             'year': year,
@@ -142,11 +140,11 @@ def INDEX(url):
                             'plot': mdes,
                             'poster': pos,
                         }
-
-                        addDir(mt,'https://api.viki.io/v4/series/'+data['id']+'/episodes.json?page=1&per_page=50&app=100000a&t='+timestamp,'prepare',mdes,pos,code=subs_local)
+                        sysurl = 'https://api.viki.io/v4/series/'+data['id']+'/episodes.json?page=1&per_page=50&app=100000a&t='+timestamp
+                        addDir(title, sysurl, 'prepare', mdes, pos, code=subs_local)
 
                     else: #Jeśli jest to film fabularny lub wideo
-                        if (data['blocked'] == False): #Проверка за достъпност
+                        if (data['blocked'] == False):
                             try: #Napisy lokalne
                                 subs_local = str(data['subtitle_completions'][lang])
                             except:
@@ -160,25 +158,25 @@ def INDEX(url):
                             except:
                                 dur = ''
                             try: #Rozdzielczość wideo
-                                hd = str(data['flags']['hd'])
+                                quality = str(data['flags']['hd'])
                             except:
-                                hd = 'False'
+                                quality = 'False'
                             try: #Nazwa / opis filmu
-                                mt = str(data['titles']['en'])
+                                title = str(data['titles']['en'])
                             except:
-                                mt = 'Movie Title'
+                                title = 'Movie Title'
                             try: #Autor / Studio
-                                at = str(data['author'])
+                                author = str(data['author'])
                             except:
-                                at = ''
+                                author = ''
                             try: #Movie ID
-                                mid = str(data['id'])
+                                movie_ID = str(data['id'])
                             except:
-                                mid = ''
+                                movie_ID = ''
                             try: #Poster
-                                pos = str(data['images']['poster']['url'])
+                                poster = str(data['images']['poster']['url'])
                             except:
-                                pos = ''
+                                poster = ''
                             try: #Ocena
                                 rating = data['rating']
                             except:
@@ -187,15 +185,26 @@ def INDEX(url):
                                 ar = str(data['container']['review_stats']['average_rating'])
                             except:
                                 ar = '0'
-                            xbmcplugin.setContent(int(sys.argv[1]), 'movie')
 
-                            addLink(mt,mid+'@'+pos+'@'+subs_local+'@'+subs_en+'@'+mt,dur,hd,mt,at,rating,ar,'play',pos)
-        #######################
+                            meta = {
+                                'title': title,
+                                'movieID': movie_ID,
+                                'original_title': '',
+                                #'origin_country': origin_country,
+                                #'year': year,
+                                'quality': quality,
+                                'local_subs': subs_local,
+                                'en_subs': subs_en,
+                                'poster': poster,
+                                'duration': 'duration'
+                            }
+                            xbmcplugin.setContent(int(sys.argv[1]), 'movie')
+                            sysurl = movie_ID +'@'+poster+'@'+subs_local+'@'+subs_en+'@'+title
+                            addLink(title, sysurl, dur, quality, title, author, rating, ar, 'play', poster, meta)
+
 
     except:
         pass
-        #xbmc.executebuiltin('Notification(%s, %s, %d, %s)'%('VIKI®','Error in INDEX Function', 4000, md+'DefaultIconError.png'))
-    #Koniec indeksowania
 
     #next page...
     if jsonrsp['more'] == True:
@@ -212,21 +221,18 @@ def PREPARE(url):
     timestamp = str(int(time.time()))
     jsonrsp = requests.get(url + order, headers=header).json()
 
-    #print (jsonrsp)
-
-    #Rozpocznij indeksowanie
     for episode in range(0, len(jsonrsp['response'])):
         data = jsonrsp['response'][episode]
         try:
-            if (data['blocked'] == False): #Kontrola dostępności — zablokowana lub nie
+            if (data['blocked'] == False):
                 try: #Nazwa serii
                     tsn = str(data['container']['titles']['en'])
                 except:
                     tsn = ''
                 try: #Numer odcinka serialu
-                    ep = L(32121) + str(data['number'])
+                    ep_no = L(32121) + str(data['number'])
                 except:
-                    ep = ''
+                    ep_no = ''
                 try: #Identyfikator odcinka
                     video_id = str(data['id'])
                 except:
@@ -268,13 +274,14 @@ def PREPARE(url):
                 except:
                     rating = 'G'
 
-
-                addLink(tsn + ep, video_id +'@'+pos+'@'+subs_local+'@'+subs_en+'@'+et,dur,hd,et,at,rating,ar,'play',pos)
+                sysurl = video_id +'@'+pos+'@'+subs_local+'@'+subs_en+'@'+et
+                addLink(tsn + ep_no, sysurl,dur,hd,et,at,rating,ar,'play',pos)
 
         except:
-            xbmc.executebuiltin('Notification(%s, %s, %d, %s)'%('VIKI®','Error in PREPARE Function', 4000, md+'DefaultIconError.png'))
+            common.dialog.notification(L(32003), L(32125), MEDIA['error'], 4000)
+
     if len(jsonrsp['response'])==0:
-        addDir(32122, '', '', '', md+'DefaultFolderBack.png')
+        addDir(32122, '', '', '', MEDIA['back'])
     #Koniec indeksowania
 
     #Next page...
@@ -284,7 +291,7 @@ def PREPARE(url):
             newpage = int(page)+1
             url = fronturl + 'page=' + str(newpage) + '&per_page=50&app=100000a&t=' + timestamp
             #print 'URL OF THE NEXT PAGE IS' + url
-            addDir(32120, url, 'prepare', '', md+'DefaultFolder.png')
+            addDir(32120, url, 'prepare', '', MEDIA['folder'])
 
 #Gatunki
 def GENRE(url):
@@ -293,10 +300,8 @@ def GENRE(url):
     link = 'https://api.viki.io/v4/videos/genres.json?app=100000a'
     jsonrsp = requests.get(link + order, headers=header).json()
 
-    #print jsonrsp[0]['name']['en']
-
     for genre in range(0, len(jsonrsp)):
-        addDir(jsonrsp[genre]['name']['en'], 'https://api.viki.io/v4/'+url+'.json?sort=newest_video&page=1&per_page=50&app=100000a&genre='+jsonrsp[genre]['id']+'&t=', 'index', '', md+'DefaultFolder.png')
+        addDir(jsonrsp[genre]['name']['en'], 'https://api.viki.io/v4/'+url+'.json?sort=newest_video&page=1&per_page=50&app=100000a&genre='+jsonrsp[genre]['id']+'&t=', 'index', '', MEDIA['folder'])
 
 #Kraj
 def COUNTRY(url):
@@ -304,18 +309,16 @@ def COUNTRY(url):
     link = 'https://api.viki.io/v4/videos/countries.json?app=100000a'
 
     jsonrsp = requests.get(link + order, headers=header).json()
-    #print jsonrsp['ae']['name']['en']
 
     for country, subdict in jsonrsp.items():
-        addDir(jsonrsp[country]['name']['en'], 'https://api.viki.io/v4/'+url+'.json?sort=newest_video&page=1&per_page=50&app=100000a&origin_country='+country+'&t=', 'index', '',md+'DefaultFolder.png')
+        addDir(jsonrsp[country]['name']['en'], 'https://api.viki.io/v4/'+url+'.json?sort=newest_video&page=1&per_page=50&app=100000a&origin_country='+country+'&t=', 'index', '',MEDIA['folder'])
 
 def SEARCH():
 
-    addDir(32103, '', "movieSearchnew", '', md+'DefaultAddonsSearch.png') #"[B]New search...[/B]
-    #addLink(32102, 'loadbyid', '0', 'True', '', '', 'G', '5.0', 'loadID', md + 'DefaultStudios.png')
+    addDir(32103, '', "movieSearchnew", '', MEDIA['search']) #"[B]New search...[/B]
+    addLink(32102, 'loadbyid', '0', 'True', '', '', 'G', '5.0', 'loadID', MEDIA['studio'])
 
     from sqlite3 import dbapi2 as database
-
     dbcon = database.connect(searchFile)
     dbcur = dbcon.cursor()
 
@@ -333,15 +336,14 @@ def SEARCH():
         for (id, term) in dbcur.fetchall():
             if term not in str(lst):
                 delete_option = True
-                addDir(term, "", "movieSearchterm&name=%s" % term, "", md+'DefaultAddonsSearch.png')
+                addDir(term, "", "movieSearchterm&name=%s" % term, "", MEDIA['search'])
                 lst += [(term)]
     except:
         pass
     dbcur.close()
 
     if delete_option:
-        addDir(32119, '', "clearCacheSearch", '', md+'DefaultAddonsSearch.png')
-
+        addDir(32119, '', "clearCacheSearch", '', MEDIA['search'])
 
 def search_new(url):
 
@@ -350,7 +352,7 @@ def search_new(url):
     k.doModal()
     q = k.getText() if k.isConfirmed() else None
     if q is None or q == "":
-        addDir(32001, '', '', '', md+'DefaultFolderBack.png')
+        addDir(32001, '', '', '', MEDIA['back'])
 
     from sqlite3 import dbapi2 as database
 
@@ -361,7 +363,6 @@ def search_new(url):
     dbcur.close()
 
     q = quote_plus(q)
-    #print ('SEARCHING:' + q)
     INDEX(url + q)
 
 def search_term(url, name):
@@ -379,130 +380,119 @@ def clear_search():
     dbcur.close()
     SEARCH()
 
-#Załaduj klip według ID - nie działa wywala na napisach
+#Załaduj klip według ID
 def LOADBYID():
 
     dialog = xbmcgui.Dialog()
     vid = dialog.numeric(0, L(32002))
     if vid != '':
-        PLAY('VIKI®', vid+'v@0@50', md+'DefaultStudios.png')
-    #keyb = xbmc.Keyboard('', L(32002))
-    #keyb.doModal()
-    #if (keyb.isConfirmed()):
-    #    vid = quote_plus(keyb.getText())
-    #    #print 'LOADBYID:' + vid
-    #    PLAY('VIKI®', vid+'@0@50', md+'DefaultStudios.png')
+        PLAY('VIKI®', vid+'v@@0@50@', MEDIA['studio'])
     else:
-        addDir(32001, '', '', '', md+'DefaultFolderBack.png')
+        addDir(32001, '', '', '', MEDIA['back'])
 
 def PLAY(name,url,iconimage):
 
-        video_id, thumbnail, subtitle_completion1, subtitle_completion2, plot = url.split("@")
+    ll = parse_qsl(sys.argv[2])
 
-        #Pobieranie napisów
-        try:
-            if (int(subtitle_completion1)>79 and se=='true'): #Jeśli przetłumaczone ponad 79% napisów w naszym języku
-                srtsubs_path = xbmcvfs.translatePath('special://temp/vikirakuten.' + language +'.srt')
+    video_id, thumbnail, subtitle_local, subtitle_en, plot = url.split("@")
 
-                subs = VikiAPI.get_subs(video_id, lang)
-                f = xbmcvfs.File(srtsubs_path, 'w')
-                f.write(subs)
-                f.close()
-                sub = 'true'
-            elif (int(subtitle_completion2)>0 and se=='true'): #Przełączamy się na napisy w języku angielskim
-                srtsubs_path = common.srtsubs_path
+    #Pobieranie napisów
+    try:
+        #Jeśli przetłumaczone ponad 79% napisów w lokalnym języku
+        if (int(subtitle_local)>79 and subs_enabled=='true'):
+            srtsubs_path = xbmcvfs.translatePath('special://temp/vikirakuten.' + language +'.srt')
 
-                subs = VikiAPI.get_subs(video_id, 'en')
-                f = xbmcvfs.File(srtsubs_path, 'w')
-                f.write(subs)
-                f.close()
+            subs = VikiAPI.get_subs(video_id, lang)
+            f = xbmcvfs.File(srtsubs_path, 'w')
+            f.write(subs)
+            f.close()
+            sub = 'true'
+        #Pobrane napisy w języku angielskim, gdy tłumaczenie niewystarczające
+        elif (int(subtitle_en)>0 and subs_enabled=='true'):
+            srtsubs_path = common.srtsubs_path
+            subs = VikiAPI.get_subs(video_id, 'en')
+            f = xbmcvfs.File(srtsubs_path, 'w')
+            f.write(subs)
+            f.close()
+            common.dialog.notification(L(32003), L(32124), MEDIA['subtitles'], 4000)
 
-                sub = 'true'
-            else:
-                sub = 'false' #Jeśli nie są dostępne napisy
-                xbmc.executebuiltin('Notification(%s, %s, %d, %s)'% (L(32003), L(32004), 4000, md+'DefaultAddonSubtitles.png'))
-        except:
-            sub = 'false' #Jeśli wystąpił błąd w pobieraniu napisów
-            xbmc.executebuiltin('Notification(%s, %s, %d, %s)'% (L(32003), L(32005), 4000, md+'DefaultIconError.png'))
-        try:
+            sub = 'true'
+        else:
+            sub = 'false' #Jeśli nie są dostępne napisy
+            common.dialog.notification(L(32003), L(32004), MEDIA['subtitles'], 4000)
 
-            ## youtube-dl
-            #web = 'https://www.viki.com/videos/' + url + '-viki-link'
-            #vid = YDStreamExtractor.getVideoInfo(web,quality=1) #quality is 0=SD, 1=720p, 2=1080p and is a maximum
-            #test = vid._streams
+    except:
+        sub = 'false' #Jeśli wystąpił błąd w pobieraniu napisów
+        common.dialog.notification(L(32003), L(32005), MEDIA['error'], 4000)
 
-            ## Independent API
-            manifest, lic = VikiAPI.get_stream(video_id)
+    try:
+        ## youtube-dl
+        #web = 'https://www.viki.com/videos/' + url + '-viki-link'
+        #vid = YDStreamExtractor.getVideoInfo(web,quality=1) #quality is 0=SD, 1=720p, 2=1080p and is a maximum
+        #test = vid._streams
 
-            stream = manifest[0]
+        ## Independent API
+        manifest, lic = VikiAPI.get_stream(video_id)
 
+        stream = manifest[0]
 
-        except HTTPError as e:
-            xbmcgui.Dialog().ok('VIKI® Error',str(e.code)+" "+str(e.reason)+"\n"+"That's all we know about this error.")
-        except URLError as e:
-            xbmcgui.Dialog().ok('VIKI® Error',str(e.code)+" "+str(e.reason)+"\n"+"That's all we know about this error.")
+    except HTTPError as e:
+        xbmcgui.Dialog().ok('VIKI® Error',str(e.code)+" "+str(e.reason)+"\n"+"That's all we know about this error.")
+    except URLError as e:
+        xbmcgui.Dialog().ok('VIKI® Error',str(e.code)+" "+str(e.reason)+"\n"+"That's all we know about this error.")
 
-        #Ładowanie wideo
-        try:
-            #mp4 stream
-            if stream[-3:] != 'mpd':
-                stream = stream+'|verifypeer=false&User-Agent='+ quote_plus(MUA)+'&Referer=https://www.viki.com'
+    #Ładowanie wideo
+    try:
+        PROTOCOL = 'mpd'
+        DRM = 'com.widevine.alpha'
+        is_helper = inputstreamhelper.Helper(PROTOCOL)
+        if is_helper.check_inputstream():
+
+            if stream: #Jeśli API zwróci wynik/manifest
+
+                import ssl
+                try:
+                    _create_unverified_https_context = ssl._create_unverified_context
+                except AttributeError:
+                    pass
+                else:
+                    ssl._create_default_https_context = _create_unverified_https_context
+                certificate_data = "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 VsLobiUUxUx2s1Y//+knyk7clpgw7dzQJd+q"
+
                 li = xbmcgui.ListItem(path=stream)
-                li.setArt({'thumb': thumbnail,'poster': thumbnail, 'banner': thumbnail, 'fanart': thumbnail, 'icon': thumbnail})
-                li.setInfo(type="Video", infoLabels={ 'Title': name, 'Plot': plot})
+                li.setArt({'thumb': thumbnail, 'poster': thumbnail, 'banner' : thumbnail, 'fanart': thumbnail, 'icon': thumbnail })
+                li.setInfo(type="Video", infoLabels={'Title': name, 'Plot': plot})
+
+                li.setMimeType('application/xml+dash')
+                li.setContentLookup(False)
+
+                li.setProperty('inputstream', 'inputstream.adaptive')
+                li.setProperty('inputstream.adaptive.manifest_type', PROTOCOL)
+                li.setProperty('inputstream.adaptive.license_type', DRM)
+                li.setProperty('inputstream.adaptive.server_certificate', certificate_data)
+
+                #li.setProperty('inputstream.adaptive.license_key', stream + '||R{SSM}|')
+                li.setProperty('inputstream.adaptive.license_key', lic['dt3']+'|User-Agent='+ quote_plus(UA)+'&Origin=https://www.viki.com&Referer=https://www.viki.com|R{SSM}|')
+                #li.setProperty('inputstream.adaptive.stream_headers', 'User-Agent='+ quote_plus(UA)+'&Origin=https://www.viki.com&Referer=https://www.viki.com&verifypeer=false')
 
             else:
+                common.dialog.notification(L(32003), L(32126), MEDIA['locked'], 4000)
 
-                is_helper = inputstreamhelper.Helper('mpd', drm='com.widevine.alpha')
-                if is_helper.check_inputstream():
-                    if manifest: #Jeśli API zwróci wynik/manifest
+        #subtitles on
+        if (sub=='true'):
+            li.setSubtitles([srtsubs_path])
 
-                        import ssl
-                        try:
-                            _create_unverified_https_context = ssl._create_unverified_context
-                        except AttributeError:
-                            pass
-                        else:
-                            ssl._create_default_https_context = _create_unverified_https_context
-                        certificate_data = "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 VsLobiUUxUx2s1Y//+knyk7clpgw7dzQJd+q"
+        else:
+            xbmc.Player().showSubtitles(False)
+        xbmcplugin.setResolvedUrl(int(sys.argv[1]), True, listitem=li)
 
-
-                        li = xbmcgui.ListItem(path=stream)
-                        li.setArt({'thumb': thumbnail, 'poster': thumbnail, 'banner' : thumbnail, 'fanart': thumbnail, 'icon': thumbnail })
-                        li.setInfo(type="Video", infoLabels={ 'Title': name, 'Plot': plot } )
-
-                        li.setMimeType('application/xml+dash')
-                        li.setContentLookup(False)
-
-                        li.setProperty('inputstream', 'inputstream.adaptive')
-                        li.setProperty('inputstream.adaptive.manifest_type', 'mpd')
-                        li.setProperty('inputstream.adaptive.server_certificate', certificate_data)
-                        #li.setProperty('inputstream.adaptive.license_type', 'com.widevine.alpha')
-
-                        #li.setProperty('inputstream.adaptive.license_key', stream + '||R{SSM}|')
-                        li.setProperty('inputstream.adaptive.license_key', lic['dt3']+'|User-Agent='+ quote_plus(UA)+'&Origin=https://www.viki.com&Referer=https://www.viki.com|R{SSM}|')
-                        #li.setProperty('inputstream.adaptive.stream_headers', 'User-Agent='+ quote_plus(UA)+'&Origin=https://www.viki.com&Referer=https://www.viki.com&verifypeer=false')
-
-                    else:
-                        xbmc.executebuiltin('Notification(%s, %s, %d, %s)'%('VIKI®','API does not return a result', 4000, md+'OverlayLocked.png'))
-
-            #Ustaw napisy, jeśli są, lub wyłącz je
-            if (sub=='true'):
-                li.setSubtitles([srtsubs_path])
-                #while not xbmc.Player().isPlaying():
-                #	xbmc.sleep(1000) #wait until video is being played
-                #	xbmc.Player().setSubtitles(srtsubs_path)
-            else:
-                xbmc.Player().showSubtitles(False)
-            xbmcplugin.setResolvedUrl(int(sys.argv[1]), True, listitem=li)
-
-        except HTTPError as e:
-            xbmcgui.Dialog().ok('VIKI® Error',str(e.code)+" "+str(e.reason)+"\n"+"That's all we know about this error.")
-        except URLError as e:
-            xbmcgui.Dialog().ok('VIKI® Error',str(e.code)+" "+str(e.reason)+"\n"+"That's all we know about this error.")
+    except HTTPError as e:
+        xbmcgui.Dialog().ok('VIKI® Error',str(e.code)+" "+str(e.reason)+"\n"+"That's all we know about this error.")
+    except URLError as e:
+        xbmcgui.Dialog().ok('VIKI® Error',str(e.code)+" "+str(e.reason)+"\n"+"That's all we know about this error.")
 
 
-def addLink(name,url,vd,hd,plot,author,rating,ar,action,iconimage,meta={}):
+def addLink(name, url, vd, hd, plot, author, rating, ar, action, iconimage, meta={}):
 
     if isinstance(name, int):
         name = L(name)
@@ -543,8 +533,8 @@ def addLink(name,url,vd,hd,plot,author,rating,ar,action,iconimage,meta={}):
                                     }
                           )
 
-    liz.addStreamInfo('audio', { 'codec': 'aac', 'channels': 2 })
-    liz.setProperty("IsPlayable" , "true")
+    liz.addStreamInfo('audio', {'codec': 'aac', 'channels': 2})
+    liz.setProperty("IsPlayable", "true")
 
     contextmenu = []
     contextmenu.append(('Information', 'XBMC.Action(Info)'))
@@ -583,7 +573,6 @@ def addDir(name, url,  action, plot, iconimage, code='', meta={}):
     xbmcplugin.addSortMethod(int(sys.argv[1]), sortMethod=xbmcplugin.SORT_METHOD_UNSORTED,
                              label2Mask='%P ')
 
-
 #
 #  MODES
 #
@@ -616,6 +605,5 @@ elif action == 'country':
     COUNTRY(url)
 elif action == 'loadID':
     LOADBYID()
-
 
 xbmcplugin.endOfDirectory(int(sys.argv[1]))

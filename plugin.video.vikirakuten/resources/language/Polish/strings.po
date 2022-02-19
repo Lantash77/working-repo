@@ -7,7 +7,7 @@
 # strings 31000 thru 31999 reserved for skins
 # strings 32000 thru 32999 reserved for scripts
 # strings 33000 thru 33999 reserved for common strings used in add-ons
-# Translators:
+# Translators: Lantash
 
 msgid ""
 msgstr ""
@@ -25,14 +25,6 @@ msgstr ""
 
 msgctxt "Addon Summary"
 msgid "VIKI.COM GLOBAL TV POWERED BY FANS"
-msgstr ""
-
-msgctxt "Addon Description"
-msgid "[B][COLOR red]Before use, set your preferences in the addon settings![/B][/COLOR] In VIKI.COM watch the best global TV shows, movies, entertainment news and other premium content in high quality, translated into more than 150 languages by a community of avid fans. Together, we’re breaking down barriers that stand between great entertainment and its fans, no matter where they are!"
-msgstr ""
-
-msgctxt "Addon Disclaimer"
-msgid "This is not an official addon! If the official APP is available for your platform,\nuse it instead of this addon. All rights on content are reserved by Rakuten."
 msgstr ""
 
 msgctxt "#0"
@@ -532,7 +524,7 @@ msgstr "Wybierz język napisów"
 
 msgctxt "#30306"
 msgid "InputStream Adaptive settings..."
-msgstr "Ustawienia wtyczki strumieniowej..."
+msgstr "Ustawienia InputStream Adaptive..."
 
 msgctxt "#30307"
 msgid "InputStream Helper settings..."
@@ -707,3 +699,19 @@ msgstr " Odcinek "
 msgctxt "#32122"
 msgid "There are no episodes for now"
 msgstr "Aktualnie brak odcinków"
+
+msgctxt "#32123"
+msgid "Set up default subtitle langage to "
+msgstr "Ustawiono domyślny język napisów na "
+
+msgctxt "#32124"
+msgid "No local translation - downloaded English subtitles "
+msgstr "Brak tłumaczenia - pobrano Angielskie napisy"
+
+msgctxt "#32125"
+msgid "Error in PREPARE Function "
+msgstr "Błąd Funkcji PREPARE"
+
+msgctxt "#32126"
+msgid "API does not return a result "
+msgstr "Brak wyników z API "

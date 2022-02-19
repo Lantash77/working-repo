@@ -16,7 +16,7 @@
 				</setting>
 			</group>
 			<group id="2" label="30202">
-				<setting id="se" type="boolean" label="30304" help="">
+				<setting id="subs.enabled" type="boolean" label="30304" help="">
 					<level>0</level>
 					<default>true</default>
 					<control type="toggle"/>
@@ -25,7 +25,7 @@
 					<level>0</level>
 					<default>0</default>
 					<dependencies>
-						<dependency type="visible" setting="se">true</dependency>
+						<dependency type="visible" setting="subs.enabled">true</dependency>
 					</dependencies>
 					<constraints>
 						<options>

@@ -27,14 +27,6 @@ msgctxt "Addon Summary"
 msgid "VIKI.COM GLOBAL TV POWERED BY FANS"
 msgstr ""
 
-msgctxt "Addon Description"
-msgid "[B][COLOR red]Before use, set your preferences in the addon settings![/B][/COLOR] In VIKI.COM watch the best global TV shows, movies, entertainment news and other premium content in high quality, translated into more than 150 languages by a community of avid fans. Together, we’re breaking down barriers that stand between great entertainment and its fans, no matter where they are!"
-msgstr ""
-
-msgctxt "Addon Disclaimer"
-msgid "This is not an official addon! If the official APP is available for your platform,\nuse it instead of this addon. All rights on content are reserved by Rakuten."
-msgstr ""
-
 msgctxt "#0"
 msgid "English"
 msgstr ""
@@ -706,4 +698,20 @@ msgstr ""
 
 msgctxt "#32122"
 msgid "There are no episodes for now"
+msgstr ""
+
+msgctxt "#32123"
+msgid "Set up default subtitle langage to "
+msgstr ""
+
+msgctxt "#32124"
+msgid "No local translation - downloaded English subtitles "
+msgstr ""
+
+msgctxt "#32125"
+msgid "Error in PREPARE Function "
+msgstr ""
+
+msgctxt "#32126"
+msgid "API does not return a result "
 msgstr ""
