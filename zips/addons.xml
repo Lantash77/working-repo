@@ -49,7 +49,7 @@ Mogą wystąpić błedy w trakcie korzystania.
     </extension>
 </addon>
 
-<addon id="plugin.video.vikirakuten" name="VIKI Rakuten" version="0.0.0.10" provider-name="Lantash">
+<addon id="plugin.video.vikirakuten" name="VIKI Rakuten" version="0.0.1" provider-name="Lantash">
   <requires>
 	<import addon="xbmc.python" version="3.0.0"/>
 	<import addon="inputstream.adaptive" version="2.1.0"/>
