@@ -49,14 +49,12 @@ Mogą wystąpić błedy w trakcie korzystania.
     </extension>
 </addon>
 
-<addon id="plugin.video.vikirakuten" name="VIKI Rakuten" version="0.0.0.8" provider-name="Lantash">
+<addon id="plugin.video.vikirakuten" name="VIKI Rakuten" version="0.0.0.10" provider-name="Lantash">
   <requires>
 	<import addon="xbmc.python" version="3.0.0"/>
 	<import addon="inputstream.adaptive" version="2.1.0"/>
 	<import addon="script.module.requests" version="2.22.0"/>
 	<import addon="script.module.inputstreamhelper" version="0.3.3"/>
-	<import addon="script.module.youtube.dl" version="21.303.0+matrix.1"/>
-    <import addon="script.module.six" />
   </requires>
   <extension point="xbmc.python.pluginsource" library="addon.py">
   	<provides>video</provides>
@@ -64,40 +62,34 @@ Mogą wystąpić błedy w trakcie korzystania.
   <extension point="xbmc.addon.metadata">
   	<summary lang="pl">VIKI.COM FILMY OD FANÓW DLA FANÓW</summary>
   	<summary lang="en">VIKI.COM GLOBAL TV POWERED BY FANS</summary>
-  	<description lang="pl">Na VIKI.COM oglądaj najlepsze światowe programy telewizyjne, filmy, wiadomości rozrywkowe i inne treści premium w wysokiej jakości, przetłumaczone na ponad 150 języków przez społeczność zapalonych fanów. Razem przełamujemy bariery, które stoją między świetną rozrywką a jej fanami, bez względu na to, gdzie się znajdują!</description>
-  	<description lang="en">In VIKI.COM watch the best global TV shows, movies, entertainment news and other premium content in high quality, translated into more than 150 languages by a community of avid fans. Together, we’re breaking down barriers that stand between great entertainment and its fans, no matter where they are!</description>
-  	<disclaimer lang="pl">To nie jest oficjalny dodatek! Jeśli oficjalna aplikacja jest dostępna dla Twojej platformy, użyj jej zamiast tego dodatku. Wszelkie prawa dotyczące treści są zastrzeżone przez Rakuten.</disclaimer>
-  	<disclaimer lang="en">This is not an official addon! If the official APP is available for your platform, use it instead of this addon. All rights on content are reserved by Rakuten.</disclaimer>
+  	<description lang="pl">Na VIKI.COM oglądaj najlepsze światowe programy telewizyjne, filmy, wiadomości rozrywkowe i inne treści premium w wysokiej jakości, przetłumaczone na ponad 150 języków przez społeczność zapalonych fanów. &#xA; Wtyczka powstała na bazie wtyczki Majide</description>
+  	<description lang="en">In VIKI.COM watch the best global TV shows, movies, entertainment news and other premium content in high quality, translated into more than 150 languages by a community of avid fans. &#xA; Addon developed based on addon created by Majide</description>
+  	<disclaimer lang="pl">To nie jest oficjalny dodatek! Jeśli oficjalna aplikacja jest dostępna dla Twojej platformy, użyj jej zamiast tego dodatku. &#xA; Wszelkie prawa dotyczące treści są zastrzeżone przez Rakuten.</disclaimer>
+  	<disclaimer lang="en">This is not an official addon! If the official APP is available for your platform, use it instead of this addon. &#xA; All rights on content are reserved by Rakuten.</disclaimer>
   	<language>en</language>
   	<platform>all</platform>
     <license>GNU GENERAL PUBLIC LICENSE. Version 3, June 2007</license>
   	<website>https://www.viki.com</website>
   	<news>
 		Changelog
-		0.0.0.7
-		Translations
-		Settings clean-up
-		Custom graphic
-		0.0.0.6
-		Translations
-		Small fixes
-		0.0.0.5
+		0.0.1
+		Settings initialization
+		Local subtitles autoselect
+		Settings refactor
 		Disconnected from youtube-dl
 		Independent API
-		0.0.0.4
-		search and search histrory
-		crearing search history
-		0.0.0.3
-		Audio fix
-		hash fix
+		Translations
+		Added search history list
+		Added clean search list
 		Language list
+
 	</news>
 	<assets>
 	   <icon>resources/icon.png</icon>
        <fanart>resources/fanart.jpg</fanart>
-       <screenshot>resources/screenshot-01.jpg</screenshot>
-       <screenshot>resources/screenshot-02.jpg</screenshot>
-       <screenshot>resources/screenshot-03.jpg</screenshot>
+       <screenshot>resources/vikiscr1.jpg</screenshot>
+       <screenshot>resources/vikiscr2.jpg</screenshot>
+       <screenshot>resources/vikiscr3.jpg</screenshot>
 	</assets>
   </extension>
 </addon>
