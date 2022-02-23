@@ -3,11 +3,9 @@ import hmac
 import hashlib
 import base64
 import json
-import re
-import datetime
 import requests
 import xml.etree.ElementTree as ET
-
+from resources.libs import cache
 
 class VikiAPI():
 
@@ -22,7 +20,6 @@ class VikiAPI():
     _GEO_BYPASS = False
     _UA = 'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/97.0.4692.99 Mobile Safari/537.36 Edg/97.0.1072.69'
     _token = None
-
 
     def _headers(self):
         return {
@@ -66,8 +63,7 @@ class VikiAPI():
     def api_query(self, path, version=4, full='', **kwargs):
         path += '?' if '?' not in path else '&'
         query = f'/v{version}/{path}app={self._APP}'
-        if self._token:
-            query += '&token=%s' % self._token
+
         if full:
             return f'{self._API_URL_TEMPLATE}{query}' + ''.join(f'&{name}={val}' for name, val in kwargs.items())
         return query + ''.join(f'&{name}={val}' for name, val in kwargs.items())
@@ -81,22 +77,29 @@ class VikiAPI():
         return requests.get(signedurl).text
 
     def sign_query(self, path):
-        #timestamp = int(time.time())
+
         query = self.api_query(path, version=5)
         timestamp, sig = self.hash(query)
         return timestamp, sig, f'{self._API_URL_TEMPLATE}{query}', f'{self._API_URL_TEMPLATE}{query}' + f'&t={timestamp}&sig={sig}'
 
-
     def call_api(
-            self, path, video_id=None, data=None, query=None):
+            self, path, data=None, query=None):
         if query is None:
             timestamp, sig, url, signedurl = self.sign_query(path)
         else:
             url = self.api_query(path, version=4, full=True)
         if data:
             data = json.dumps(data)
+            login_url = f'https://api.viki.io/v5/sessions.json?app={self._APP}'
             headers = {'x-viki-app-ver': self._APP_VERSION}
-            res = requests.post(url, headers=headers)
+            res_ = requests.post(login_url, headers=headers)
+            if res_.status_code == 200:
+                cache.insert('token', res_.json().get('token'))
+                cache.insert('user_name', res_.json().get('user').get('name'))
+                cache.insert('user_vip', res_.json().get('user').get('subscriber'))
+                res = 'Ok'
+            else:
+                res = 'Failed'
         else:
             res = requests.get(url, headers=self._stream_headers(timestamp, sig))
         return res

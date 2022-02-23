@@ -11,7 +11,7 @@ import re
 import time
 import os
 from ast import literal_eval as evaluate
-import six
+#import six
 import xbmcaddon, xbmcvfs
 makeFile = xbmcvfs.mkdir
 try:
@@ -36,7 +36,7 @@ def get(function_, duration, *args, **table):
 
         a = hashlib.md5()
         for i in args:
-            a.update(six.ensure_binary(i, errors="replace"))
+            a.update(ensure_binary(i, errors="replace"))
         a = str(a.hexdigest())
     except Exception:
         pass
@@ -277,7 +277,7 @@ def _get_function_name(function_instance):
 
 def _generate_md5(*args):
     md5_hash = hashlib.md5()
-    [md5_hash.update(six.ensure_binary(arg, errors="replace")) for arg in args]
+    [md5_hash.update(ensure_binary(arg, errors="replace")) for arg in args]
     return str(md5_hash.hexdigest())
 
 
@@ -285,3 +285,22 @@ def _is_cache_valid(cached_time, cache_timeout):
     now = int(time.time())
     diff = now - cached_time
     return (cache_timeout * 3600) > diff
+
+def ensure_binary(s, encoding='utf-8', errors='strict'):
+    """Coerce **s** to six.binary_type.
+
+    For Python 2:
+      - `unicode` -> encoded to `str`
+      - `str` -> `str`
+
+    For Python 3:
+      - `str` -> encoded to `bytes`
+      - `bytes` -> `bytes`
+    """
+    binary_type = bytes
+    text_type = str
+    if isinstance(s, binary_type):
+        return s
+    if isinstance(s, text_type):
+        return s.encode(encoding, errors)
+    raise TypeError("not expecting type '%s'" % type(s))

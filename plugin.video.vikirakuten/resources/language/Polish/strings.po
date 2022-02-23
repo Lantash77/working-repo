@@ -502,7 +502,9 @@ msgctxt "#30202"
 msgid "Subtitles"
 msgstr "Napisy"
 
-#empty string with id 30203
+msgctxt "#30203"
+msgid "Acceptable subtitle translation status"
+msgstr "Akceptowalny postęp tłumaczenia napisów"
 
 msgctxt "#30204"
 msgid "Order of episodes"
@@ -642,43 +644,43 @@ msgstr "Filmy wg Krajów"
 
 msgctxt "#32108"
 msgid "New Movies"
-msgstr "Nowe Filmy"
+msgstr "Filmy Nowości"
 
 msgctxt "#32109"
 msgid "Popular Movies"
-msgstr "Popularne Filmy"
+msgstr "Filmy Popularne"
 
 msgctxt "#32110"
 msgid "Best Movies"
-msgstr "Najlepsze Filmy"
+msgstr "Filmy Najlepsze"
 
 msgctxt "#32111"
 msgid "Recent Movies"
-msgstr "Najczęściej Oglądane Filmy"
+msgstr "Filmy Najczęściej Oglądane"
 
 msgctxt "#32112"
 msgid "Browse Series by Genre"
-msgstr "Seriale Kategorie"
+msgstr "Dramy Kategorie"
 
 msgctxt "#32113"
 msgid "Browse Series by Country"
-msgstr "Seriale wg Kraju"
+msgstr "Dramy wg Kraju"
 
 msgctxt "#32114"
 msgid "New Series"
-msgstr "Nowe Seriale"
+msgstr "Dramy Nowości"
 
 msgctxt "#32115"
 msgid "Popular Series"
-msgstr "Popularne Seriale"
+msgstr "Dramy Popularne"
 
 msgctxt "#32116"
 msgid "Best Series"
-msgstr "Najlepsze Seriale"
+msgstr "Dramy Najlepsze"
 
 msgctxt "#32117"
 msgid "Recent Series"
-msgstr "Najczęściej Oglądane Seriale"
+msgstr "Dramy Najczęściej Oglądane"
 
 msgctxt "#32118"
 msgid "Latest Clips"
@@ -709,8 +711,8 @@ msgid "No local translation - downloaded English subtitles "
 msgstr "Brak tłumaczenia - pobrano Angielskie napisy"
 
 msgctxt "#32125"
-msgid "Error in PREPARE Function "
-msgstr "Błąd Funkcji PREPARE"
+msgid "Error in Episode listing Funtion "
+msgstr "Błąd Listowania odcinków "
 
 msgctxt "#32126"
 msgid "API does not return a result "

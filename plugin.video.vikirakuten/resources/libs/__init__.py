@@ -4,5 +4,5 @@
     VIKI Rakuten® addon Add-on
 """
 
-from . import lang_sel
-from . import cache
+#from . import lang_sel
+#from . import cache

@@ -8,9 +8,7 @@ import xbmcaddon
 
 
 my_addon = xbmcaddon.Addon()
-my_addon_id = my_addon.getAddonInfo('id')
 getSetting = my_addon.getSetting
-L = my_addon.getLocalizedString
 
 languagelist = [{'lang': 'en', 'code': '0', 'language': 'English'},
 				{'lang': 'bg', 'code': '1', 'language': 'Bulgarian'},

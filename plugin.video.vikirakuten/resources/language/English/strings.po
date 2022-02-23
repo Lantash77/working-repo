@@ -502,7 +502,9 @@ msgctxt "#30202"
 msgid "Subtitles"
 msgstr ""
 
-#empty string with id 30203
+msgctxt "#30203"
+msgid "Acceptable subtitle translation status"
+msgstr ""
 
 msgctxt "#30204"
 msgid "Order of episodes"
@@ -709,7 +711,7 @@ msgid "No local translation - downloaded English subtitles "
 msgstr ""
 
 msgctxt "#32125"
-msgid "Error in PREPARE Function "
+msgid "Error in Episode listing Funtion "
 msgstr ""
 
 msgctxt "#32126"
