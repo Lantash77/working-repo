@@ -1,7 +1,8 @@
 
 # Files
 _repo_xml_generator_p3.py
-
+addons.xml
+addons.xml.md5
 # Dirs
 __pycache__/
 zips/*
